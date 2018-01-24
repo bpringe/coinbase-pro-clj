@@ -126,10 +126,14 @@
 ;;;;;;;;;;;;; Private Endpoints ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-accounts []
+(defn get-accounts 
+  []
   (-> (build-request "get" "/accounts")
       sign-request
       http/request))
 
- 
-
+(defn get-account-by-id
+  [account-id]
+  (->> (build-request "get" (str "/accounts/" account-id))
+       sign-request
+       http/request))
