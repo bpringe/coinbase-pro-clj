@@ -34,7 +34,8 @@
           :url (str (:api-base-url config)
                     (if (str/starts-with? path "/") path (str "/" path)))
           :as :json
-          :debug true}
+          :debug true
+          :headers {"Content-Type" "application/json"}}
          opts))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -61,10 +62,11 @@
 (defn- sign-request 
   [request]
   (let [timestamp (quot (System/currentTimeMillis) 1000)]
-    (merge request {:headers {"CB-ACCESS-KEY" (:api-key config)
-                              "CB-ACCESS-SIGN" (create-signature request timestamp)
-                              "CB-ACCESS-TIMESTAMP" timestamp
-                              "CB-ACCESS-PASSPHRASE" (:api-passphrase config)}})))
+    (assoc request :headers
+      (merge (:headers request) {"CB-ACCESS-KEY" (:api-key config)
+                                 "CB-ACCESS-SIGN" (create-signature request timestamp)
+                                 "CB-ACCESS-TIMESTAMP" timestamp
+                                 "CB-ACCESS-PASSPHRASE" (:api-passphrase config)}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;; Public Endpoints ;;;;;;;;;;;;;;
@@ -128,3 +130,6 @@
   (-> (build-request "get" "/accounts")
       sign-request
       http/request))
+
+ 
+
