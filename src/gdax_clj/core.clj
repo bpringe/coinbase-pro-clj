@@ -6,7 +6,6 @@
     [environ.core :refer [env]]
     [clj-time.core :as t]
     [clojure.data.codec.base64 :as b64]
-    [clojure.string :as str]
     [clojure.pprint :refer [pprint]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -31,13 +30,30 @@
 
 (defn- build-request
   [method path & [opts]]
-  (merge {:method (str/upper-case method)
+  (merge {:method (clojure.string/upper-case method)
           :url (str (:api-base-url config)
-                    (if (str/starts-with? path "/") path (str "/" path)))
+                    (if (clojure.string/starts-with? path "/") path (str "/" path)))
           :as :json
           :debug (:debug-requests config)
           :headers {"Content-Type" "application/json"}}
          opts))
+
+(defn- map->query-string
+  [params]
+  (clojure.string/join "&"
+    (for [[k v] params]
+      (str (name k) "=" (java.net.URLEncoder/encode (str v))))))
+
+(defn- append-paging-options
+  [paging-options request]
+  (if (empty? paging-options)
+    request
+    (update-in request [:url] 
+      #(str % 
+        (if (clojure.string/includes? % "?") "&" "?") 
+        (map->query-string paging-options)))))
+    
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Authentication ;;;;;;;;;;;;;
@@ -45,16 +61,16 @@
 
 (defn- parse-request-path
   [request-url]
-  (second (str/split request-url #".com")))
+  (second (clojure.string/split request-url #".com")))
 
 (defn- create-prehash-string
-  [request timestamp]
+  [timestamp request]
   (str timestamp (:method request) (parse-request-path (:url request)) (:body request)))
 
 (defn- create-signature
-  [request timestamp]
+  [timestamp request]
   (let [secret-decoded (b64/decode (.getBytes (:api-secret config)))
-        prehash-string (create-prehash-string request timestamp)
+        prehash-string (create-prehash-string timestamp request)
         hmac (sha256-hmac* prehash-string secret-decoded)]
     (-> hmac
         b64/encode
@@ -64,15 +80,10 @@
   [request]
   (let [timestamp (quot (System/currentTimeMillis) 1000)]
     (update-in request [:headers] conj {"CB-ACCESS-KEY" (:api-key config)
-                                        "CB-ACCESS-SIGN" (create-signature request timestamp)
+                                        "CB-ACCESS-SIGN" (create-signature timestamp request)
                                         "CB-ACCESS-TIMESTAMP" timestamp
                                         "CB-ACCESS-PASSPHRASE" (:api-passphrase config)})))
-                                        
-                                        
-(->> (build-request "get" "/account")
-     sign-request
-     pprint)
-
+                       
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;; Public Endpoints ;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -143,19 +154,18 @@
        sign-request
        http/request))
 
-;; TODO: implement paging
 (defn get-account-history
-  [account-id]
+  [account-id & [paging-options]]
   (->> (build-request "get" (str "/accounts/" account-id "/ledger"))
-      sign-request
-      http/request))
-
-;; TODO: implement paging
-(defn get-account-holds
-  [account-id]
-  (->> (build-request "get" (str "/accounts/" account-id "/holds"))
+       (append-paging-options paging-options)
        sign-request
        http/request))
 
+(defn get-account-holds
+  [account-id & [paging-options]]
+  (->> (build-request "get" (str "/accounts/" account-id "/holds"))
+       (append-paging-options paging-options)
+       sign-request
+       http/request))
 
 
