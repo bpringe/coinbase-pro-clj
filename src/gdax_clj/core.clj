@@ -63,11 +63,15 @@
 (defn- sign-request 
   [request]
   (let [timestamp (quot (System/currentTimeMillis) 1000)]
-    (assoc request :headers
-      (merge (:headers request) {"CB-ACCESS-KEY" (:api-key config)
-                                 "CB-ACCESS-SIGN" (create-signature request timestamp)
-                                 "CB-ACCESS-TIMESTAMP" timestamp
-                                 "CB-ACCESS-PASSPHRASE" (:api-passphrase config)}))))
+    (update-in request [:headers] conj {"CB-ACCESS-KEY" (:api-key config)
+                                        "CB-ACCESS-SIGN" (create-signature request timestamp)
+                                        "CB-ACCESS-TIMESTAMP" timestamp
+                                        "CB-ACCESS-PASSPHRASE" (:api-passphrase config)})))
+                                        
+                                        
+(->> (build-request "get" "/account")
+     sign-request
+     pprint)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;; Public Endpoints ;;;;;;;;;;;;;;
@@ -154,6 +158,4 @@
        http/request))
 
 
-
-  
 
