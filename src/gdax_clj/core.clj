@@ -20,9 +20,10 @@
                              :1h 3600
                              :6h 21600
                              :1d 86400}
-              :api-key (env :api-key)
-              :api-secret (env :api-secret)
-              :api-passphrase (env :api-passphrase)})
+             :api-key (env :api-key)
+             :api-secret (env :api-secret)
+             :api-passphrase (env :api-passphrase)
+             :debug-requests false})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -34,7 +35,7 @@
           :url (str (:api-base-url config)
                     (if (str/starts-with? path "/") path (str "/" path)))
           :as :json
-          :debug true
+          :debug (:debug-requests config)
           :headers {"Content-Type" "application/json"}}
          opts))
 
@@ -137,3 +138,22 @@
   (->> (build-request "get" (str "/accounts/" account-id))
        sign-request
        http/request))
+
+;; TODO: implement paging
+(defn get-account-history
+  [account-id]
+  (->> (build-request "get" (str "/accounts/" account-id "/ledger"))
+      sign-request
+      http/request))
+
+;; TODO: implement paging
+(defn get-account-holds
+  [account-id]
+  (->> (build-request "get" (str "/accounts/" account-id "/holds"))
+       sign-request
+       http/request))
+
+
+
+  
+
