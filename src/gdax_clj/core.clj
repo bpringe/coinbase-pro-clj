@@ -6,6 +6,7 @@
     [environ.core :refer [env]]
     [clj-time.core :as t]
     [clojure.data.codec.base64 :as b64]
+    [clojure.data.json :as json]
     [clojure.pprint :refer [pprint]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22,7 +23,7 @@
              :api-key (env :api-key)
              :api-secret (env :api-secret)
              :api-passphrase (env :api-passphrase)
-             :debug-requests false})
+             :debug-requests true})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -30,7 +31,7 @@
 
 (defn- build-base-request
   [method path]
-  {:method (clojure.string/upper-case method)
+  {:method method
    :url (str (:api-base-url config)
           (if (clojure.string/starts-with? path "/") path (str "/" path)))
    :accept :json
@@ -45,7 +46,8 @@
 (defn- build-post-request
   [path body & [opts]]
   (merge (build-base-request "POST" path)
-         {:body body}
+         {:body (json/write-str body)
+          :content-type :json}
          opts))
 
 (defn- map->query-string
@@ -73,8 +75,18 @@
 
 (defn- create-prehash-string
   [timestamp request]
-  (str timestamp (:method request) (parse-request-path (:url request)) (:body request)))
+  (str timestamp (clojure.string/upper-case (:method request)) 
+    (parse-request-path (:url request)) (:body request)))
 
+(def request {:method "get" 
+              :url "https://api-public.sandbox.gdax.com/orders"
+              :body {:side "buy"
+                     :product-id "btc-usd"
+                     :price "11500.00"
+                     :size 2}})
+
+;; (create-prehash-string 123456 request)
+                    
 (defn- create-signature
   [timestamp request]
   (let [secret-decoded (b64/decode (.getBytes (:api-secret config)))
@@ -183,4 +195,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;; Orders ;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn place-limit-order
+  [side product-id price size & [opts]]
+  (let [body {:side side
+              :product_id product-id
+              :price price
+              :size size
+              :type "limit"}]
+    (->> (build-post-request "/orders" body opts)
+         sign-request
+         http/request)))
 
