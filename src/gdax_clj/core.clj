@@ -196,14 +196,26 @@
 ;;;;;;;;;;; Orders ;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn place-limit-order
-  [side product-id price size & [opts]]
-  (let [body {:side side
-              :product_id product-id
-              :price price
-              :size size
-              :type "limit"}]
-    (->> (build-post-request "/orders" body opts)
+(defn place-order
+  [side product-id & [opts]]
+  (let [body (merge opts {:side side
+                          :product_id product-id})]
+    (->> (build-post-request "/orders" body)
          sign-request
          http/request)))
+
+(defn place-limit-order
+  [side product-id price size & [opts]]
+  (place-order side product-id (merge opts {:price price
+                                            :size size
+                                            :type "limit"})))
+
+(defn place-market-order
+  [side product-id & [opts]]
+  (place-order side product-id (merge opts {:type "market"})))
+
+(defn place-stop-order
+  [side product-id price & [opts]]
+  (place-order side product-id (merge opts {:type "stop"
+                                            :price price})))
 
