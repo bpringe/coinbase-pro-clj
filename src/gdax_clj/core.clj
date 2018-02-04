@@ -23,7 +23,8 @@
              :api-key (env :api-key)
              :api-secret (env :api-secret)
              :api-passphrase (env :api-passphrase)
-             :debug-requests true})
+             :debug-requests false})
+             
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -218,4 +219,12 @@
   [side product-id price & [opts]]
   (place-order side product-id (merge opts {:type "stop"
                                             :price price})))
+
+;; status can be :open, :pending, :active, :done, :all
+(defn get-orders
+  [statuses & [product-id]]
+  (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))]
+    (->> (build-get-request (str "/orders?" query-string))
+         sign-request
+         http/request)))
 
