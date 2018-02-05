@@ -51,6 +51,11 @@
           :content-type :json}
          opts))
 
+(defn- build-delete-request
+  [path & [opts]]
+  (merge (build-base-request "DELETE" path)
+         opts))
+
 (defn- map->query-string
   [params]
   (clojure.string/join "&"
@@ -227,4 +232,16 @@
     (->> (build-get-request (str "/orders?" query-string))
          sign-request
          http/request)))
+
+(defn cancel-order
+  [order-id]
+  (->> (build-delete-request (str "/orders/" order-id))
+       (sign-request)
+       http/request))
+
+;; d4aad869-3ff2-4c89-a679-beca541444fd
+(cancel-order "d4aad869-3ff2-4c89-a679-beca541444fd")
+(place-limit-order "buy" "btc-usd" 7000 2)
+(pprint (get-orders [:open]))
+  
 
