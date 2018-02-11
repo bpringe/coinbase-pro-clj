@@ -24,7 +24,6 @@
              :api-secret (env :api-secret)
              :api-passphrase (env :api-passphrase)
              :debug-requests false})
-             
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -62,14 +61,14 @@
     (for [[k v] params]
       (str (name k) "=" (java.net.URLEncoder/encode (str v))))))
 
-(defn- append-paging-options
-  [paging-options request]
-  (if (empty? paging-options)
+(defn- append-query-params
+  [query-params request]
+  (if (empty? query-params)
     request
     (update-in request [:url] 
       #(str % 
         (if (clojure.string/includes? % "?") "&" "?") 
-        (map->query-string paging-options)))))
+        (map->query-string query-params)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Authentication ;;;;;;;;;;;;;
@@ -187,14 +186,14 @@
 (defn get-account-history
   [account-id & [paging-options]]
   (->> (build-get-request (str "/accounts/" account-id "/ledger"))
-       (append-paging-options paging-options)
+       (append-query-params paging-options)
        sign-request
        http/request))
 
 (defn get-account-holds
   [account-id & [paging-options]]
   (->> (build-get-request (str "/accounts/" account-id "/holds"))
-       (append-paging-options paging-options)
+       (append-query-params paging-options)
        sign-request
        http/request))
 
@@ -205,7 +204,7 @@
 (defn place-order
   [side product-id & [opts]]
   (let [body (merge opts {:side side
-                          :product_id product-id})]
+                          :product_id (clojure.string/upper-case product-id)})]
     (->> (build-post-request "/orders" body)
          sign-request
          http/request)))
@@ -226,10 +225,15 @@
                                             :price price})))
 
 ;; status can be :open, :pending, :active, :done, :all
+;; TODO: make statuses optional param and incorporate product-id
+;; Might need to use map param since just product-id or just statuses can be passed
+;; Or just require that [] or nil passed as statuses if need to pass product-id
 (defn get-orders
-  [statuses & [product-id]]
+  [& [statuses product-id]]
   (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))]
-    (->> (build-get-request (str "/orders?" query-string))
+    (->> (build-get-request (str "/orders"
+                                 (when-not (clojure.string/blank? query-string) "?")
+                                 query-string))
          sign-request
          http/request)))
 
@@ -239,9 +243,31 @@
        (sign-request)
        http/request))
 
-;; d4aad869-3ff2-4c89-a679-beca541444fd
-(cancel-order "d4aad869-3ff2-4c89-a679-beca541444fd")
-(place-limit-order "buy" "btc-usd" 7000 2)
-(pprint (get-orders [:open]))
+(defn cancel-all
+  [& [product-id]]
+  (->> (build-delete-request 
+          (str "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
+       sign-request
+       http/request))
+
+;; TODO: test this method when orders endpoint is not returning 500
+(defn get-order
+  [order-id]
+  (->> (build-get-request (str "/orders/" order-id))
+       sign-request
+       http/request))
+
+(defn get-fills
+  [& [params]]
+  (->> (build-get-request "fills")
+       (append-query-params params)
+       sign-request
+       http/request))
   
+
+
+
+  
+       
+
 
