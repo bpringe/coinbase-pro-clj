@@ -224,16 +224,14 @@
   (place-order side product-id (merge opts {:type "stop"
                                             :price price})))
 
-;; status can be :open, :pending, :active, :done, :all
-;; TODO: make statuses optional param and incorporate product-id
-;; Might need to use map param since just product-id or just statuses can be passed
-;; Or just require that [] or nil passed as statuses if need to pass product-id
 (defn get-orders
-  [& [statuses product-id]]
-  (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))]
+  [& {:keys [statuses] :as options}]
+  (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))
+        rest-options (dissoc options :statuses)]
     (->> (build-get-request (str "/orders"
                                  (when-not (clojure.string/blank? query-string) "?")
                                  query-string))
+         (append-query-params rest-options)
          sign-request
          http/request)))
 
@@ -250,7 +248,6 @@
        sign-request
        http/request))
 
-;; TODO: test this method when orders endpoint is not returning 500
 (defn get-order
   [order-id]
   (->> (build-get-request (str "/orders/" order-id))
@@ -263,11 +260,5 @@
        (append-query-params params)
        sign-request
        http/request))
-  
-
-
-
-  
-       
 
 
