@@ -23,7 +23,7 @@
              :api-key (env :api-key)
              :api-secret (env :api-secret)
              :api-passphrase (env :api-passphrase)
-             :debug-requests true})
+             :debug-requests false})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -212,8 +212,8 @@
 (defn place-limit-order
   [side product-id price size & [options]]
   (place-order side product-id (merge options {:price price
-                                            :size size
-                                            :type "limit"})))
+                                               :size size
+                                               :type "limit"})))
 
 (defn place-market-order
   [side product-id & [options]]
@@ -222,7 +222,7 @@
 (defn place-stop-order
   [side product-id price & [options]]
   (place-order side product-id (merge options {:type "stop"
-                                            :price price})))
+                                               :price price})))
 
 (defn get-orders
   [& {:keys [statuses] :as options}]
@@ -304,6 +304,30 @@
           :crypto_address crypto-address})
        sign-request
        http/request))
+
+(defn generate-fills-report
+  [start-date end-date product-id format & [email]]
+  (->> (build-post-request "/reports" {:type "fills"
+                                       :start_date start-date
+                                       :end_date end-date
+                                       :product_id (clojure.string/upper-case product-id)
+                                       :format format
+                                       :email email})
+       sign-request
+       http/request))
+
+;; TODO: test this method
+(defn generate-account-report
+  [start-date end-date account-id format & [email]]
+  (->> (build-post-request "/reports" {:type "account"
+                                       :start_date start-date
+                                       :end_date end-date
+                                       :account_id (clojure.string/upper-case account-id)
+                                       :format format
+                                       :email email})
+       sign-request
+       http/request))
+
 
 
           
