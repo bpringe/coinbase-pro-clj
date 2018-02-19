@@ -23,7 +23,7 @@
              :api-key (env :api-key)
              :api-secret (env :api-secret)
              :api-passphrase (env :api-passphrase)
-             :debug-requests false})
+             :debug-requests true})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Request Building ;;;;;;;;;;;
@@ -39,21 +39,21 @@
    :debug (:debug-requests config)})
 
 (defn- build-get-request
-  [path & [opts]]
+  [path & [options]]
   (merge (build-base-request "GET" path)
-         opts))
+         options))
 
 (defn- build-post-request
-  [path body & [opts]]
+  [path body & [options]]
   (merge (build-base-request "POST" path)
          {:body (json/write-str body)
           :content-type :json}
-         opts))
+         options))
 
 (defn- build-delete-request
-  [path & [opts]]
+  [path & [options]]
   (merge (build-base-request "DELETE" path)
-         opts))
+         options))
 
 (defn- map->query-string
   [params]
@@ -202,26 +202,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn place-order
-  [side product-id & [opts]]
-  (let [body (merge opts {:side side
-                          :product_id (clojure.string/upper-case product-id)})]
+  [side product-id & [options]]
+  (let [body (merge options {:side side
+                             :product_id (clojure.string/upper-case product-id)})]
     (->> (build-post-request "/orders" body)
          sign-request
          http/request)))
 
 (defn place-limit-order
-  [side product-id price size & [opts]]
-  (place-order side product-id (merge opts {:price price
+  [side product-id price size & [options]]
+  (place-order side product-id (merge options {:price price
                                             :size size
                                             :type "limit"})))
 
 (defn place-market-order
-  [side product-id & [opts]]
-  (place-order side product-id (merge opts {:type "market"})))
+  [side product-id & [options]]
+  (place-order side product-id (merge options {:type "market"})))
 
 (defn place-stop-order
-  [side product-id price & [opts]]
-  (place-order side product-id (merge opts {:type "stop"
+  [side product-id price & [options]]
+  (place-order side product-id (merge options {:type "stop"
                                             :price price})))
 
 (defn get-orders
@@ -255,10 +255,55 @@
        http/request))
 
 (defn get-fills
-  [& [params]]
-  (->> (build-get-request "fills")
-       (append-query-params params)
+  [& [options]]
+  (->> (build-get-request "/fills")
+       (append-query-params options)
+       sign-request
+       http/request))
+
+(defn get-payment-methods
+  []
+  (->> (build-get-request "/payment-methods")
+       sign-request
+       http/request))
+
+(defn get-coinbase-accounts
+  []
+  (->> (build-get-request "/coinbase-accounts")
+       sign-request
+       http/request))
+
+(defn deposit-from-coinbase
+  [amount currency coinbase-account-id]
+  (->> (build-post-request 
+         "/deposits/coinbase-account" 
+         {:amount amount
+          :currency (clojure.string/upper-case currency)
+          :coinbase_account_id coinbase-account-id})
+       sign-request
+       http/request))
+
+(defn withdraw-to-coinbase
+  [amount currency coinbase-account-id]
+  (->> (build-post-request 
+         "/withdrawals/coinbase-account"
+         {:amount amount
+          :currency (clojure.string/upper-case currency)
+          :coinbase_account_id coinbase-account-id})
+       sign-request
+       http/request))
+
+;; TODO: try this with actual API instead of sandbax. If it works, also implement
+;; deposit and withdraw for payment methods too
+(defn withdraw-to-crypto-address
+  [amount currency crypto-address]
+  (->> (build-post-request
+         "/withdrawals/crypto"
+         {:amount amount
+          :currency (clojure.string/upper-case currency)
+          :crypto_address crypto-address})
        sign-request
        http/request))
 
 
+          
