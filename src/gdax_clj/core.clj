@@ -306,28 +306,36 @@
        http/request))
 
 (defn generate-fills-report
-  [start-date end-date product-id format & [email]]
-  (->> (build-post-request "/reports" {:type "fills"
-                                       :start_date start-date
-                                       :end_date end-date
-                                       :product_id (clojure.string/upper-case product-id)
-                                       :format format
-                                       :email email})
-       sign-request
-       http/request))
+  [start-date end-date product-id & [options]]
+  (let [params (merge options
+                      {:type "fills"
+                       :start_date start-date
+                       :end_date end-date
+                       :product_id (clojure.string/upper-case product-id)})]
+    (->> (build-post-request "/reports" params)
+         sign-request
+         http/request)))
 
 ;; TODO: test this method
 (defn generate-account-report
-  [start-date end-date account-id format & [email]]
-  (->> (build-post-request "/reports" {:type "account"
-                                       :start_date start-date
-                                       :end_date end-date
-                                       :account_id (clojure.string/upper-case account-id)
-                                       :format format
-                                       :email email})
+  [start-date end-date account-id & [options]]
+  (let [params (merge options 
+                      {:type "account"
+                       :start_date start-date
+                       :end_date end-date
+                       :account_id (clojure.string/upper-case account-id)})]
+    (->> (build-post-request "/reports" params)
+         sign-request
+         http/request)))
+
+(defn get-report-status
+  [report-id]
+  (->> (build-get-request (str "/reports/" report-id))
        sign-request
        http/request))
 
-
-
-          
+(defn get-trailing-volume
+  []
+  (->> (build-get-request "/users/self/trailing-volume")
+       sign-request
+       http/request))
