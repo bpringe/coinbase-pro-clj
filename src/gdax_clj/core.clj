@@ -388,7 +388,6 @@
   (let [socket (get-socket)]
     (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))))
 
-    
 ;; TODO: return map from subscribe (a "subscription") with a :close keyword 
 ;; mapped to a function that will close the connection
 ;(subscribe ["btc-usd"] ["level2"])
