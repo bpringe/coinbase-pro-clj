@@ -7,13 +7,17 @@
     [clj-time.core :as t]
     [clojure.data.codec.base64 :as b64]
     [clojure.data.json :as json]
-    [clojure.pprint :refer [pprint]]))
+    [clojure.pprint :refer [pprint]]
+    [gniazdo.core :as ws])
+  (:import (org.eclipse.jetty.websocket.client WebSocketClient)
+           (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Configuration ;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config {:api-base-url "https://api-public.sandbox.gdax.com"
+             :websocket-url "wss://ws-feed-public.sandbox.gdax.com"
              :granularities {:1m 60
                              :5m 300
                              :15m 900
@@ -339,3 +343,51 @@
   (->> (build-get-request "/users/self/trailing-volume")
        sign-request
        http/request))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;; Websocket Feed ;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- get-subscribe-message
+  [product-ids channels]
+  {:type "subscribe" 
+   :product_ids product-ids 
+   :channels channels})
+
+(defn- on-connect
+  [session]
+  (println "Connected to websocket." (pprint session)))
+
+(defn- on-receive
+  [message]
+  (println "Received:" message))
+
+(defn- on-error
+  [error]
+  (println "Error occurred:" error))
+
+(defn on-close
+  [status-code reason]
+  (println "Connection to websocket closed. Status code:" status-code ". Reason:" reason))
+
+(defn get-socket
+  []
+  (let [client (WebSocketClient. (SslContextFactory.))]
+    (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
+    (.start client)
+    (ws/connect
+      (:websocket-url config)
+      :client client
+      :on-connect on-connect
+      :on-receive on-receive
+      :on-error on-error
+      :on-close on-close)))
+
+(defn subscribe
+  [product-ids channels]
+  (let [socket (get-socket)]
+    (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))))
+
+;; TODO: return map from subscribe (a "subscription") with a :close keyword 
+;; mapped to a function that will close the connection
+;(subscribe ["btc-usd"] ["level2"])
