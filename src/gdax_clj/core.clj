@@ -366,11 +366,11 @@
   [error]
   (println "Error occurred:" error))
 
-(defn on-close
+(defn- on-close
   [status-code reason]
   (println "Connection to websocket closed. Status code:" status-code ". Reason:" reason))
 
-(defn get-socket
+(defn- get-socket
   []
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
