@@ -386,9 +386,9 @@
 (defn subscribe
   [product-ids channels]
   (let [socket (get-socket)]
-    (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))))
+    (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))
+    {:close #(ws/close socket)}))
 
-    
 ;; TODO: return map from subscribe (a "subscription") with a :close keyword 
 ;; mapped to a function that will close the connection
 ;(subscribe ["btc-usd"] ["level2"])
