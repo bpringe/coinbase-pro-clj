@@ -1,4 +1,5 @@
 (ns gdax-clj.core
+  "Core protocols for interacting with the GDAX API"
   (:require 
     [pandect.algo.sha256 :refer :all]
     [cheshire.core :refer :all]
@@ -12,67 +13,26 @@
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;; Configuration ;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Convenience values
 
-(def config {:api-base-url "https://api-public.sandbox.gdax.com"
-             :websocket-url "wss://ws-feed-public.sandbox.gdax.com"
-             :granularities {:1m 60
-                             :5m 300
-                             :15m 900
-                             :1h 3600
-                             :6h 21600
-                             :1d 86400}
-             :api-key (env :api-key)
-             :api-secret (env :api-secret)
-             :api-passphrase (env :api-passphrase)
-             :debug-requests false})
+(def granularities {:1m 60
+                    :5m 300
+                    :15m 900
+                    :1h 3600
+                    :6h 21600
+                    :1d 86400})
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;; Request Building ;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Protocols
 
-(defn- build-base-request
-  [method path]
-  {:method method
-   :url (str (:api-base-url config)
-          (if (clojure.string/starts-with? path "/") path (str "/" path)))
-   :accept :json
-   :as :json
-   :debug (:debug-requests config)})
-
-(defn- build-get-request
-  [path & [options]]
-  (merge (build-base-request "GET" path)
-         options))
-
-(defn- build-post-request
-  [path body & [options]]
-  (merge (build-base-request "POST" path)
-         {:body (json/write-str body)
-          :content-type :json}
-         options))
-
-(defn- build-delete-request
-  [path & [options]]
-  (merge (build-base-request "DELETE" path)
-         options))
-
-(defn- map->query-string
-  [params]
-  (clojure.string/join "&"
-    (for [[k v] params]
-      (str (name k) "=" (java.net.URLEncoder/encode (str v))))))
-
-(defn- append-query-params
-  [query-params request]
-  (if (empty? query-params)
-    request
-    (update-in request [:url] 
-      #(str % 
-        (if (clojure.string/includes? % "?") "&" "?") 
-        (map->query-string query-params)))))
+(defprotocol GdaxPublicEndpoints
+  (get-time [this])
+  (get-products [this])
+  (get-order-book [this product-id] [this product-id level])
+  (get-ticker [this product-id])
+  (get-trades [this product-id])
+  (get-historic-rates [this product-id] [this product-id start end granularity])
+  (get-product-stats [this product-id])
+  (get-currencies [this]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; Authentication ;;;;;;;;;;;;;
@@ -93,8 +53,6 @@
                      :product-id "btc-usd"
                      :price "11500.00"
                      :size 2}})
-
-;; (create-prehash-string 123456 request)
                     
 (defn- create-signature
   [timestamp request]
@@ -112,60 +70,8 @@
                                          "CB-ACCESS-SIGN" (create-signature timestamp request)
                                          "CB-ACCESS-TIMESTAMP" timestamp
                                          "CB-ACCESS-PASSPHRASE" (:api-passphrase config)})))
-                       
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;; Public Endpoints ;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-time
-  []
-  (http/request (build-get-request "/time")))
 
-(defn get-products 
-  []
-  (http/request (build-get-request "/products")))
-
-(defn get-order-book
-  ([product-id]
-   (get-order-book product-id 1))
-  ([product-id level]
-   (->> (str "/products/" product-id "/book?level=" level)
-        build-get-request
-        http/request)))
-
-(defn get-ticker
-  [product-id]
-  (->> (str "/products/" product-id "/ticker")
-       build-get-request
-       http/request))
-
-(defn get-trades 
-  [product-id]
-  (->> (str "/products/" product-id "/trades")
-       build-get-request
-       http/request))
-
-;; Remember to use (t/today-at 00 00) to avoid sending time ahead of server time
-(defn get-historic-rates
-  ([product-id]
-   (->> "/products/eth-usd/candles"
-        build-get-request
-        http/request))
-  ([product-id start end granularity]
-   (->> (str "/products/" product-id "/candles?start="
-         start "&end=" end "&granularity=" granularity)
-        build-get-request
-        http/request)))
-      
-(defn get-product-stats
-  [product-id]
-  (->> (str "/products/" product-id "/stats")
-       build-get-request
-       http/request))
-
-(defn get-currencies
-  []
-  (http/request (build-get-request "/currencies")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;; Private Endpoints ;;;;;;;;;;;;;
@@ -389,6 +295,5 @@
     (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))
     {:close #(ws/close socket)}))
 
-;; TODO: return map from subscribe (a "subscription") with a :close keyword 
-;; mapped to a function that will close the connection
-;(subscribe ["btc-usd"] ["level2"])
+
+
