@@ -119,11 +119,8 @@
 (defn get-currencies
   [client]
   (http/request (build-get-request (str (:api-url client) "/currencies"))))
-  
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;; Authentication ;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Authentication
 
 (defn- parse-request-path
   [request-url]
@@ -133,13 +130,6 @@
   [timestamp request]
   (str timestamp (clojure.string/upper-case (:method request)) 
     (parse-request-path (:url request)) (:body request)))
-
-(def request {:method "get" 
-              :url "https://api-public.sandbox.gdax.com/orders"
-              :body {:side "buy"
-                     :product-id "btc-usd"
-                     :price "11500.00"
-                     :size 2}})
                     
 (defn- create-signature
   [client timestamp request]
@@ -158,72 +148,63 @@
                                          "CB-ACCESS-TIMESTAMP" timestamp
                                          "CB-ACCESS-PASSPHRASE" (:api-passphrase client)})))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;; Private Endpoints ;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;; Accounts ;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Private endpoints
 
 (defn get-accounts 
   [client]
-  (->> (build-get-request "/accounts")
+  (->> (build-get-request (str (:api-url client) "/accounts"))
        (sign-request client)
        http/request))
 
 (defn get-account-by-id
   [client account-id]
-  (->> (build-get-request (str "/accounts/" account-id))
+  (->> (build-get-request (str (:api-url client) "/accounts/" account-id))
        (sign-request client)
        http/request))
 
 (defn get-account-history
   [client account-id & [paging-options]]
-  (->> (build-get-request (str "/accounts/" account-id "/ledger"))
+  (->> (build-get-request (str (:api-url client) "/accounts/" account-id "/ledger"))
        (append-query-params paging-options)
        (sign-request client)
        http/request))
 
 (defn get-account-holds
   [client account-id & [paging-options]]
-  (->> (build-get-request (str "/accounts/" account-id "/holds"))
+  (->> (build-get-request (str (:api-url client) "/accounts/" account-id "/holds"))
        (append-query-params paging-options)
        (sign-request client)
        http/request))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;; Orders ;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn place-order
   [client side product-id & [options]]
   (let [body (merge options {:side side
                              :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request "/orders" body)
+    (->> (build-post-request (str (:api-url client) "/orders") body)
          (sign-request client)
          http/request)))
 
 (defn place-limit-order
   [client side product-id price size & [options]]
-  (place-order side product-id (merge options {:price price
-                                               :size size
-                                               :type "limit"})))
+  (place-order client side product-id (merge options {:price price}
+                                                      :size size
+                                                      :type "limit")))
 
 (defn place-market-order
   [client side product-id & [options]]
-  (place-order side product-id (merge options {:type "market"})))
+  (place-order client side product-id (merge options {:type "market"})))
 
 (defn place-stop-order
   [client side product-id price & [options]]
-  (place-order side product-id (merge options {:type "stop"
-                                               :price price})))
+  (place-order client side product-id (merge options {:type "stop"}
+                                               :price price)))
 
 (defn get-orders
   [client & {:keys [statuses] :as options}]
   (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))
         rest-options (dissoc options :statuses)]
-    (->> (build-get-request (str "/orders"
+    (->> (build-get-request (str (:api-url client)
+                                 "/orders"
                                  (when-not (clojure.string/blank? query-string) "?")
                                  query-string))
          (append-query-params rest-options)
@@ -232,46 +213,46 @@
 
 (defn cancel-order
   [client order-id]
-  (->> (build-delete-request (str "/orders/" order-id))
+  (->> (build-delete-request (str (:api-url client) "/orders/" order-id))
        (sign-request client)
        http/request))
 
 (defn cancel-all
   [client & [product-id]]
   (->> (build-delete-request 
-          (str "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
+          (str (:api-url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
        (sign-request client)
        http/request))
 
 (defn get-order
   [client order-id]
-  (->> (build-get-request (str "/orders/" order-id))
+  (->> (build-get-request (str (:api-url client) "/orders/" order-id))
        (sign-request client)
        http/request))
 
 (defn get-fills
   [client & [options]]
-  (->> (build-get-request "/fills")
+  (->> (build-get-request (str (:api-url client) "/fills"))
        (append-query-params options)
        (sign-request client)
        http/request))
 
 (defn get-payment-methods
   [client]
-  (->> (build-get-request "/payment-methods")
+  (->> (build-get-request (str (:api-url client) "/payment-methods"))
        (sign-request client)
        http/request))
 
 (defn get-coinbase-accounts
   [client]
-  (->> (build-get-request "/coinbase-accounts")
+  (->> (build-get-request (str (:api-url client) "/coinbase-accounts"))
        (sign-request client)
        http/request))
 
 (defn deposit-from-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
-         "/deposits/coinbase-account" 
+         (str (:api-url client) "/deposits/coinbase-account") 
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :coinbase_account_id coinbase-account-id})
@@ -281,7 +262,7 @@
 (defn withdraw-to-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
-         "/withdrawals/coinbase-account"
+         (str (:api-url client) "/withdrawals/coinbase-account")
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :coinbase_account_id coinbase-account-id})
@@ -293,7 +274,7 @@
 (defn withdraw-to-crypto-address
   [client amount currency crypto-address]
   (->> (build-post-request
-         "/withdrawals/crypto"
+         (str (:api-url client) "/withdrawals/crypto")
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :crypto_address crypto-address})
@@ -307,11 +288,10 @@
                        :start_date start-date
                        :end_date end-date
                        :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request "/reports" params)
+    (->> (build-post-request (str (:api-url client) "/reports") params)
          (sign-request client)
          http/request)))
 
-;; TODO: test this method
 (defn generate-account-report
   [client start-date end-date account-id & [options]]
   (let [params (merge options 
@@ -319,25 +299,23 @@
                        :start_date start-date
                        :end_date end-date
                        :account_id (clojure.string/upper-case account-id)})]
-    (->> (build-post-request "/reports" params)
+    (->> (build-post-request (str (:api-url client) "/reports") params)
          (sign-request client)
          http/request)))
 
 (defn get-report-status
   [client report-id]
-  (->> (build-get-request (str "/reports/" report-id))
+  (->> (build-get-request (str (:api-url client) "/reports/" report-id))
        (sign-request client)
        http/request))
 
 (defn get-trailing-volume
   [client]
-  (->> (build-get-request "/users/self/trailing-volume")
+  (->> (build-get-request (str (:api-url client) "/users/self/trailing-volume"))
        (sign-request client)
        http/request))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;; Websocket Feed ;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ## Websocket feed
 
 (defn- get-subscribe-message
   [product-ids channels]
@@ -367,7 +345,7 @@
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
-      (:websocket-url url)
+      url
       :client client
       :on-connect on-connect
       :on-receive on-receive
@@ -375,8 +353,8 @@
       :on-close on-close)))
 
 (defn subscribe
-  [client product-ids channels]
-  (let [socket (get-socket (:websocket-url client))]
+  [url product-ids channels]
+  (let [socket (get-socket url)]
     (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))
     {:close #(ws/close socket)}))
 
