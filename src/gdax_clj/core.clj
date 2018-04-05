@@ -317,46 +317,45 @@
 
 ;; ## Websocket feed
 
+(def default-channels ["full"])
+
 (defn- get-subscribe-message
   [product-ids channels]
   {:type "subscribe" 
    :product_ids product-ids 
    :channels channels})
 
-(defn- on-connect
-  [session]
-  (println "Connected to websocket." (pprint session)))
+(defn subscribe
+  [connection product-ids channels]
+  (->> (get-subscribe-message product-ids channels)
+       json/write-str
+       (ws/send-msg connection))
+  connection)
 
-(defn- on-receive
-  [message]
-  (println "Received:" message))
+(defn close
+  [connection]
+  (ws/close connection))
 
-(defn- on-error
-  [error]
-  (println "Error occurred:" error))
-
-(defn- on-close
-  [status-code reason]
-  (println "Connection to websocket closed. Status code:" status-code ". Reason:" reason))
-
-(defn- get-socket
-  [url]
+(defn- get-socket-connection
+  [options]
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
-      url
+      (:url options)
       :client client
-      :on-connect on-connect
-      :on-receive on-receive
-      :on-error on-error
-      :on-close on-close)))
+      :on-connect (:on-connect options)
+      :on-receive (:on-receive options)
+      :on-close (:on-close options)
+      :on-error (:on-error options))))
 
-(defn subscribe
-  [url product-ids channels]
-  (let [socket (get-socket url)]
-    (ws/send-msg socket (json/write-str (get-subscribe-message product-ids channels)))
-    {:close #(ws/close socket)}))
+(defn create-websocket-connection
+  [product-ids options]
+  (let [connection (get-socket-connection options)]
+    ;; subscribe immediately so the connection isn't lost
+    (subscribe connection product-ids (or (:channels options) default-channels))))
 
 
+;; TODO: test creating websocket connection. Throws error. May need default
+;; function for callbacks if none is provided
 
