@@ -13,7 +13,11 @@
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
-;; ## Request building utilities
+;; ## Utilities
+
+(defn- edn->json
+  [edn-content]
+  (json/write-str edn-content))
 
 (defn- build-base-request
   [method url]
@@ -30,7 +34,7 @@
 (defn- build-post-request
   [url body & [options]]
   (merge (build-base-request "POST" url)
-         {:body (json/write-str body)
+         {:body (edn->json body)
           :content-type :json}
          options))
 
@@ -187,7 +191,7 @@
 (defn place-limit-order
   [client side product-id price size & [options]]
   (place-order client side product-id (merge options {:price price}
-                                                      :size size
+                                                     :size size
                                                       :type "limit")))
 
 (defn place-market-order
@@ -323,12 +327,12 @@
   [product-ids channels]
   {:type "subscribe" 
    :product_ids product-ids 
-   :channels channels})
+   :channels (or channels default-channels)})
 
 (defn subscribe
-  [connection product-ids channels]
+  [connection product-ids & [channels]]
   (->> (get-subscribe-message product-ids channels)
-       json/write-str
+       edn->json
        (ws/send-msg connection))
   connection)
 
@@ -344,18 +348,25 @@
     (ws/connect
       (:url options)
       :client client
-      :on-connect (:on-connect options)
-      :on-receive (:on-receive options)
-      :on-close (:on-close options)
-      :on-error (:on-error options))))
+      :on-connect (or (:on-connect options) (constantly nil))
+      :on-receive (or (:on-receive options) (constantly nil))
+      :on-close (or (:on-close options) (constantly nil))
+      :on-error (or (:on-error options) (constantly nil)))))
 
 (defn create-websocket-connection
   [product-ids options]
   (let [connection (get-socket-connection options)]
     ;; subscribe immediately so the connection isn't lost
-    (subscribe connection product-ids (or (:channels options) default-channels))))
+    (subscribe connection product-ids (:channels options))))
 
+;; TODO: test creating websocket connection.
+(def websocket-options {:url "wss://ws-feed-public.sandbox.gdax.com"
+                        :channels ["heartbeat"]
+                        :on-receive #(clojure.pprint/pprint (json/read-str % :key-fn keyword))})
 
-;; TODO: test creating websocket connection. Throws error. May need default
-;; function for callbacks if none is provided
+(def conn (create-websocket-connection ["eth-usd"] websocket-options))
+
+(close conn)
+
+(subscribe conn ["eth-usd"])
 
