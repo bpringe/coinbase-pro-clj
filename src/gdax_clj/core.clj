@@ -324,17 +324,29 @@
 (def default-channels ["full"])
 
 (defn- get-subscribe-message
-  [product-ids channels]
+  [options]
   {:type "subscribe" 
-   :product_ids product-ids 
-   :channels (or channels default-channels)})
+   :product_ids (:product-ids options) 
+   :channels (or (:channels options) default-channels)})
+
+(defn- get-unsubscribe-message
+  [options]
+  {:type "unsubscribe" 
+   :product_ids (:product-ids options) 
+   :channels (or (:channels options) default-channels)})
 
 (defn subscribe
-  [connection product-ids & [channels]]
-  (->> (get-subscribe-message product-ids channels)
+  [connection options]
+  (->> (get-subscribe-message options)
        edn->json
        (ws/send-msg connection))
   connection)
+
+(defn unsubscribe
+  [connection options]
+  (->> (get-unsubscribe-message options)
+       edn->json
+       (ws/send-msg connection)))
 
 (defn close
   [connection]
@@ -357,16 +369,17 @@
   [product-ids options]
   (let [connection (get-socket-connection options)]
     ;; subscribe immediately so the connection isn't lost
-    (subscribe connection product-ids (:channels options))))
+    (subscribe connection {:product-ids product-ids :channels (:channels options)})))
 
 ;; TODO: test creating websocket connection.
 (def websocket-options {:url "wss://ws-feed-public.sandbox.gdax.com"
                         :channels ["heartbeat"]
                         :on-receive #(clojure.pprint/pprint (json/read-str % :key-fn keyword))})
 
-(def conn (create-websocket-connection ["eth-usd"] websocket-options))
+(def conn (create-websocket-connection ["btc-usd"] websocket-options))
 
 (close conn)
 
-(subscribe conn ["eth-usd"])
+(subscribe conn {:product-ids ["eth-usd"] :channels ["heartbeat"]})
 
+(unsubscribe conn {:product-ids ["btc-usd"] :channels ["heartbeat"]})
