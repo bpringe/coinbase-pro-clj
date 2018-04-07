@@ -19,6 +19,10 @@
   [edn-content]
   (json/write-str edn-content))
 
+(defn- json->edn
+  [json-content]
+  (json/read-str json-content :key-fn keyword))
+
 (defn- build-base-request
   [method url]
   {:method method
@@ -70,59 +74,59 @@
 ;; ## Public endpoints
 
 ;; - `client` will take the following shape
-;; {:api-url
-;;  :api-key
-;;  :api-secret
-;;  :pass-phrase}
+;; {:url
+;;  :key
+;;  :secret
+;;  :passphrase}
 
 (defn get-time
   [client]
-  (http/request (build-get-request (str (:api-url client) "/time"))))
+  (http/request (build-get-request (str (:url client) "/time"))))
 
 (defn get-products
   [client]
-  (http/request (build-get-request (str (:api-url client) "/products"))))
+  (http/request (build-get-request (str (:url client) "/products"))))
 
 (defn get-order-book
   ([client product-id]
    (get-order-book client product-id 1))
   ([client product-id level]
-   (->> (str (:api-url client) "/products/" product-id "/book?level=" level)
+   (->> (str (:url client) "/products/" product-id "/book?level=" level)
         build-get-request
         http/request)))
   
 (defn get-ticker
   [client product-id]
-  (->> (str (:api-url client) "/products/" product-id "/ticker")
+  (->> (str (:url client) "/products/" product-id "/ticker")
        build-get-request
        http/request))
 
 (defn get-trades
   [client product-id]
-  (->> (str (:api-url client) "/products/" product-id "/trades")
+  (->> (str (:url client) "/products/" product-id "/trades")
        build-get-request
        http/request))
     
 (defn get-historic-rates
   ([client product-id]
-   (->> (str (:api-url client) "/products/" product-id "/stats")
+   (->> (str (:url client) "/products/" product-id "/stats")
         build-get-request
         http/request))
   ([client product-id start end granularity]
-   (->> (str (:api-url client) "/products/" product-id "/candles?start="
+   (->> (str (:url client) "/products/" product-id "/candles?start="
            start "&end=" end "&granularity=" granularity)
         build-get-request
         http/request)))
        
 (defn get-product-stats
   [client product-id]
-  (->> (str (:api-url client) "/products/" product-id "/stats")
+  (->> (str (:url client) "/products/" product-id "/stats")
        build-get-request
        http/request))
      
 (defn get-currencies
   [client]
-  (http/request (build-get-request (str (:api-url client) "/currencies"))))
+  (http/request (build-get-request (str (:url client) "/currencies"))))
 
 ;; ## Authentication
 
@@ -137,7 +141,7 @@
                     
 (defn- create-signature
   [client timestamp request]
-  (let [secret-decoded (b64/decode (.getBytes (:api-secret client)))
+  (let [secret-decoded (b64/decode (.getBytes (:secret client)))
         prehash-string (create-prehash-string timestamp request)
         hmac (sha256-hmac* prehash-string secret-decoded)]
     (-> hmac
@@ -147,35 +151,35 @@
 (defn- sign-request 
   [client request]
   (let [timestamp (quot (System/currentTimeMillis) 1000)]
-    (update-in request [:headers] merge {"CB-ACCESS-KEY" (:api-key client)
+    (update-in request [:headers] merge {"CB-ACCESS-KEY" (:key client)
                                          "CB-ACCESS-SIGN" (create-signature client timestamp request)
                                          "CB-ACCESS-TIMESTAMP" timestamp
-                                         "CB-ACCESS-PASSPHRASE" (:api-passphrase client)})))
+                                         "CB-ACCESS-PASSPHRASE" (:passphrase client)})))
 
 ;; ## Private endpoints
 
 (defn get-accounts 
   [client]
-  (->> (build-get-request (str (:api-url client) "/accounts"))
+  (->> (build-get-request (str (:url client) "/accounts"))
        (sign-request client)
        http/request))
 
 (defn get-account-by-id
   [client account-id]
-  (->> (build-get-request (str (:api-url client) "/accounts/" account-id))
+  (->> (build-get-request (str (:url client) "/accounts/" account-id))
        (sign-request client)
        http/request))
 
 (defn get-account-history
   [client account-id & [paging-options]]
-  (->> (build-get-request (str (:api-url client) "/accounts/" account-id "/ledger"))
+  (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
        (append-query-params paging-options)
        (sign-request client)
        http/request))
 
 (defn get-account-holds
   [client account-id & [paging-options]]
-  (->> (build-get-request (str (:api-url client) "/accounts/" account-id "/holds"))
+  (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
        (append-query-params paging-options)
        (sign-request client)
        http/request))
@@ -184,7 +188,7 @@
   [client side product-id & [options]]
   (let [body (merge options {:side side
                              :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request (str (:api-url client) "/orders") body)
+    (->> (build-post-request (str (:url client) "/orders") body)
          (sign-request client)
          http/request)))
 
@@ -207,7 +211,7 @@
   [client & {:keys [statuses] :as options}]
   (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))
         rest-options (dissoc options :statuses)]
-    (->> (build-get-request (str (:api-url client)
+    (->> (build-get-request (str (:url client)
                                  "/orders"
                                  (when-not (clojure.string/blank? query-string) "?")
                                  query-string))
@@ -217,46 +221,46 @@
 
 (defn cancel-order
   [client order-id]
-  (->> (build-delete-request (str (:api-url client) "/orders/" order-id))
+  (->> (build-delete-request (str (:url client) "/orders/" order-id))
        (sign-request client)
        http/request))
 
 (defn cancel-all
   [client & [product-id]]
   (->> (build-delete-request 
-          (str (:api-url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
+          (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
        (sign-request client)
        http/request))
 
 (defn get-order
   [client order-id]
-  (->> (build-get-request (str (:api-url client) "/orders/" order-id))
+  (->> (build-get-request (str (:url client) "/orders/" order-id))
        (sign-request client)
        http/request))
 
 (defn get-fills
   [client & [options]]
-  (->> (build-get-request (str (:api-url client) "/fills"))
+  (->> (build-get-request (str (:url client) "/fills"))
        (append-query-params options)
        (sign-request client)
        http/request))
 
 (defn get-payment-methods
   [client]
-  (->> (build-get-request (str (:api-url client) "/payment-methods"))
+  (->> (build-get-request (str (:url client) "/payment-methods"))
        (sign-request client)
        http/request))
 
 (defn get-coinbase-accounts
   [client]
-  (->> (build-get-request (str (:api-url client) "/coinbase-accounts"))
+  (->> (build-get-request (str (:url client) "/coinbase-accounts"))
        (sign-request client)
        http/request))
 
 (defn deposit-from-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
-         (str (:api-url client) "/deposits/coinbase-account") 
+         (str (:url client) "/deposits/coinbase-account") 
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :coinbase_account_id coinbase-account-id})
@@ -266,7 +270,7 @@
 (defn withdraw-to-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
-         (str (:api-url client) "/withdrawals/coinbase-account")
+         (str (:url client) "/withdrawals/coinbase-account")
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :coinbase_account_id coinbase-account-id})
@@ -278,7 +282,7 @@
 (defn withdraw-to-crypto-address
   [client amount currency crypto-address]
   (->> (build-post-request
-         (str (:api-url client) "/withdrawals/crypto")
+         (str (:url client) "/withdrawals/crypto")
          {:amount amount
           :currency (clojure.string/upper-case currency)
           :crypto_address crypto-address})
@@ -292,7 +296,7 @@
                        :start_date start-date
                        :end_date end-date
                        :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request (str (:api-url client) "/reports") params)
+    (->> (build-post-request (str (:url client) "/reports") params)
          (sign-request client)
          http/request)))
 
@@ -303,19 +307,19 @@
                        :start_date start-date
                        :end_date end-date
                        :account_id (clojure.string/upper-case account-id)})]
-    (->> (build-post-request (str (:api-url client) "/reports") params)
+    (->> (build-post-request (str (:url client) "/reports") params)
          (sign-request client)
          http/request)))
 
 (defn get-report-status
   [client report-id]
-  (->> (build-get-request (str (:api-url client) "/reports/" report-id))
+  (->> (build-get-request (str (:url client) "/reports/" report-id))
        (sign-request client)
        http/request))
 
 (defn get-trailing-volume
   [client]
-  (->> (build-get-request (str (:api-url client) "/users/self/trailing-volume"))
+  (->> (build-get-request (str (:url client) "/users/self/trailing-volume"))
        (sign-request client)
        http/request))
 
@@ -335,6 +339,14 @@
    :product_ids (:product_ids options) 
    :channels (:channels options)})
 
+;; - `options` will take the following shape
+;; {:product_ids
+;;  :channels
+;;  :signature
+;;  :key
+;;  :passphrase
+;;  :timestamp}
+
 (defn subscribe
   [connection options]
   (->> (get-subscribe-message options)
@@ -352,34 +364,46 @@
   (ws/close connection))
 
 (defn- get-socket-connection
-  [options]
+  [url callbacks]
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
-      (:url options)
+      url
       :client client
-      :on-connect (or (:on-connect options) (constantly nil))
-      :on-receive (or (:on-receive options) (constantly nil))
-      :on-close (or (:on-close options) (constantly nil))
-      :on-error (or (:on-error options) (constantly nil)))))
+      :on-connect (or (:on-connect callbacks) (constantly nil))
+      :on-receive (or (:on-receive callbacks) (constantly nil))
+      :on-close (or (:on-close callbacks) (constantly nil))
+      :on-error (or (:on-error callbacks) (constantly nil)))))
 
+;; - `options` will take the following shape
+;; {:channels
+;;  :signature
+;;  :key
+;;  :passphrase
+;;  :timestamp}
+;; - `callbacks` will take the following shape
+;; {:on-connect
+;;  :on-receive
+;;  :on-close
+;;  :on-error}
 (defn create-websocket-connection
-  [product_ids options]
-  (let [connection (get-socket-connection options)]
+  [url product_ids options callbacks]
+  (let [connection (get-socket-connection url callbacks)]
     ;; subscribe immediately so the connection isn't lost
-    (subscribe connection {:product_ids product_ids :channels (:channels options)})
+    (subscribe connection (merge {:product_ids product_ids} options))
     connection))
 
-;; TODO: test creating websocket connection.
-(def websocket-options {:url "wss://ws-feed-public.sandbox.gdax.com"
-                        :channels ["heartbeat"]
-                        :on-receive #(clojure.pprint/pprint (json/read-str % :key-fn keyword))})
+;; for testing
 
-(def conn (create-websocket-connection ["btc-usd"] websocket-options))
+(def conn (create-websocket-connection "wss://ws-feed-public.sandbox.gdax.com"
+                                       ["btc-usd"] 
+                                       {:channels ["heartbeat"]}
+                                       {:on-receive #(clojure.pprint/pprint (json->edn %))}))
 
 (close conn)
 
 (subscribe conn {:channels [{:name "heartbeat" :product_ids ["eth-usd"]}]})
 
 (unsubscribe conn {:channels [{:name "heartbeat" :product_ids ["btc-usd"]}]})
+
