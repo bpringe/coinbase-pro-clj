@@ -326,21 +326,20 @@
 (defn- get-subscribe-message
   [options]
   {:type "subscribe" 
-   :product_ids (:product-ids options) 
+   :product_ids (:product_ids options) 
    :channels (or (:channels options) default-channels)})
 
 (defn- get-unsubscribe-message
   [options]
   {:type "unsubscribe" 
-   :product_ids (:product-ids options) 
-   :channels (or (:channels options) default-channels)})
+   :product_ids (:product_ids options) 
+   :channels (:channels options)})
 
 (defn subscribe
   [connection options]
   (->> (get-subscribe-message options)
        edn->json
-       (ws/send-msg connection))
-  connection)
+       (ws/send-msg connection)))
 
 (defn unsubscribe
   [connection options]
@@ -366,10 +365,11 @@
       :on-error (or (:on-error options) (constantly nil)))))
 
 (defn create-websocket-connection
-  [product-ids options]
+  [product_ids options]
   (let [connection (get-socket-connection options)]
     ;; subscribe immediately so the connection isn't lost
-    (subscribe connection {:product-ids product-ids :channels (:channels options)})))
+    (subscribe connection {:product_ids product_ids :channels (:channels options)})
+    connection))
 
 ;; TODO: test creating websocket connection.
 (def websocket-options {:url "wss://ws-feed-public.sandbox.gdax.com"
@@ -380,6 +380,6 @@
 
 (close conn)
 
-(subscribe conn {:product-ids ["eth-usd"] :channels ["heartbeat"]})
+(subscribe conn {:channels [{:name "heartbeat" :product_ids ["eth-usd"]}]})
 
-(unsubscribe conn {:product-ids ["btc-usd"] :channels ["heartbeat"]})
+(unsubscribe conn {:channels [{:name "heartbeat" :product_ids ["btc-usd"]}]})
