@@ -1,75 +1,18 @@
 (ns gdax-clj.core
-  "Core protocols for interacting with the GDAX API"
+  "Public and private endpoint functions and websocket feed functionality."
   (:require 
-    [pandect.algo.sha256 :refer :all]
+    [gdax-clj.utilities :refer :all]
+    [gdax-clj.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
     [environ.core :refer [env]]
     [clj-time.core :as t]
-    [clojure.data.codec.base64 :as b64]
-    [clojure.data.json :as json]
     [clojure.pprint :refer [pprint]]
     [gniazdo.core :as ws])
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
-;; ## Utilities
-
-(defn- edn->json
-  [edn-content]
-  (json/write-str edn-content))
-
-(defn- json->edn
-  [json-content]
-  (json/read-str json-content :key-fn keyword))
-
-(defn- contains-many? [m & ks]
-  (every? #(contains? m %) ks))
-
-(defn- get-timestamp
-  []
-  (quot (System/currentTimeMillis) 1000))
-
-(defn- build-base-request
-  [method url]
-  {:method method
-   :url url
-   :accept :json
-   :as :json})
-
-(defn- build-get-request
-  [url & opts]
-  (merge (build-base-request "GET" url)
-         opts))
-
-(defn- build-post-request
-  [url body & opts]
-  (merge (build-base-request "POST" url)
-         {:body (edn->json body)
-          :content-type :json}
-         opts))
-
-(defn- build-delete-request
-  [url & opts]
-  (merge (build-base-request "DELETE" url)
-         opts))
-
-(defn- map->query-string
-  [params]
-  (clojure.string/join "&"
-    (for [[k v] params]
-      (str (name k) "=" (java.net.URLEncoder/encode (str v))))))
-
-(defn- append-query-params
-  [query-params request]
-  (if (empty? query-params)
-    request
-    (update-in request [:url] 
-      #(str % 
-        (if (clojure.string/includes? % "?") "&" "?") 
-        (map->query-string query-params)))))
-
-;; ## Configuration
+;; ## Convenience/config values
 
 (def granularities {:1m 60
                     :5m 300
@@ -81,6 +24,7 @@
 (def websocket-url "wss://ws-feed.gdax.com")
 (def sandbox-rest-url "https://public.sandbox.gdax.com")
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
+(def default-channels ["full"])
 
 ;; ## Public endpoints
 
@@ -138,52 +82,6 @@
 (defn get-currencies
   [client]
   (http/request (build-get-request (str (:url client) "/currencies"))))
-
-;; ## Authentication
-
-(defn- parse-request-path
-  [request-url]
-  (second (clojure.string/split request-url #".com")))
-
-(defn- create-prehash-string
-  [timestamp request]
-  (str timestamp (clojure.string/upper-case (:method request)) 
-    (parse-request-path (:url request)) (:body request)))
-                    
-(defn- create-http-signature
-  [secret timestamp request]
-  (let [secret-decoded (b64/decode (.getBytes secret))
-        prehash-string (create-prehash-string timestamp request)
-        hmac (sha256-hmac* prehash-string secret-decoded)]
-    (-> hmac
-        b64/encode
-        String.)))
-
-(defn- create-websocket-signature
-  [secret timestamp]
-  (let [secret-decoded (b64/decode (.getBytes secret))
-        prehash-string (str timestamp "GET/users/self/verify")
-        hmac (sha256-hmac* prehash-string secret-decoded)]
-    (-> hmac
-        b64/encode
-        String.)))
-
-(defn- sign-request 
-  [client request]
-  (let [timestamp (quot (System/currentTimeMillis) 1000)]
-    (update-in request [:headers] merge {"CB-ACCESS-KEY" (:key client)
-                                         "CB-ACCESS-SIGN" (create-http-signature (:secret client) timestamp request)
-                                         "CB-ACCESS-TIMESTAMP" timestamp
-                                         "CB-ACCESS-PASSPHRASE" (:passphrase client)})))
-
-(defn- sign-message
-  [message {:keys [key secret passphrase]}]
-  (let [timestamp (get-timestamp)]
-    (merge message
-           {:key key
-            :passphrase passphrase
-            :timestamp timestamp
-            :signature (create-websocket-signature secret timestamp)})))
 
 ;; ## Private endpoints
 
@@ -354,8 +252,6 @@
 
 ;; ## Websocket feed
 
-(def default-channels ["full"])
-
 (defn- get-subscribe-message
   [opts]
   (let [message {:type "subscribe" 
@@ -374,7 +270,6 @@
 ;; - `opts` will take the following shape
 ;; {:product_ids
 ;;  :channels (optional)
-;;  :url (optional)
 ;;  :key (optional)
 ;;  :secret (optional)
 ;;  :passphrase (optional)}
@@ -406,9 +301,7 @@
       :on-receive (or (:on-receive opts) (constantly nil))
       :on-close (or (:on-close opts) (constantly nil))
       :on-error (or (:on-error opts) (constantly nil)))))
-
-;; - `callbacks` will take the following shape
-;; {}
+      
 ;; - `opts` will take the following shape
 ;; {:channels
 ;;  :sandbox
