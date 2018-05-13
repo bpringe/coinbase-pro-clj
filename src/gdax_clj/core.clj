@@ -23,6 +23,13 @@
   [json-content]
   (json/read-str json-content :key-fn keyword))
 
+(defn- contains-many? [m & ks]
+  (every? #(contains? m %) ks))
+
+(defn- get-timestamp
+  []
+  (quot (System/currentTimeMillis) 1000))
+
 (defn- build-base-request
   [method url]
   {:method method
@@ -31,21 +38,21 @@
    :as :json})
 
 (defn- build-get-request
-  [url & [options]]
+  [url & opts]
   (merge (build-base-request "GET" url)
-         options))
+         opts))
 
 (defn- build-post-request
-  [url body & [options]]
+  [url body & opts]
   (merge (build-base-request "POST" url)
          {:body (edn->json body)
           :content-type :json}
-         options))
+         opts))
 
 (defn- build-delete-request
-  [url & [options]]
+  [url & opts]
   (merge (build-base-request "DELETE" url)
-         options))
+         opts))
 
 (defn- map->query-string
   [params]
@@ -62,7 +69,7 @@
         (if (clojure.string/includes? % "?") "&" "?") 
         (map->query-string query-params)))))
 
-;; ## Convenience values
+;; ## Configuration
 
 (def granularities {:1m 60
                     :5m 300
@@ -70,6 +77,10 @@
                     :1h 3600
                     :6h 21600
                     :1d 86400})
+(def rest-url "https://api.gdax.com")
+(def websocket-url "wss://ws-feed.gdax.com")
+(def sandbox-rest-url "https://public.sandbox.gdax.com")
+(def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
 
 ;; ## Public endpoints
 
@@ -139,10 +150,19 @@
   (str timestamp (clojure.string/upper-case (:method request)) 
     (parse-request-path (:url request)) (:body request)))
                     
-(defn- create-signature
-  [client timestamp request]
-  (let [secret-decoded (b64/decode (.getBytes (:secret client)))
+(defn- create-http-signature
+  [secret timestamp request]
+  (let [secret-decoded (b64/decode (.getBytes secret))
         prehash-string (create-prehash-string timestamp request)
+        hmac (sha256-hmac* prehash-string secret-decoded)]
+    (-> hmac
+        b64/encode
+        String.)))
+
+(defn- create-websocket-signature
+  [secret timestamp]
+  (let [secret-decoded (b64/decode (.getBytes secret))
+        prehash-string (str timestamp "GET/users/self/verify")
         hmac (sha256-hmac* prehash-string secret-decoded)]
     (-> hmac
         b64/encode
@@ -152,9 +172,18 @@
   [client request]
   (let [timestamp (quot (System/currentTimeMillis) 1000)]
     (update-in request [:headers] merge {"CB-ACCESS-KEY" (:key client)
-                                         "CB-ACCESS-SIGN" (create-signature client timestamp request)
+                                         "CB-ACCESS-SIGN" (create-http-signature (:secret client) timestamp request)
                                          "CB-ACCESS-TIMESTAMP" timestamp
                                          "CB-ACCESS-PASSPHRASE" (:passphrase client)})))
+
+(defn- sign-message
+  [message {:keys [key secret passphrase]}]
+  (let [timestamp (get-timestamp)]
+    (merge message
+           {:key key
+            :passphrase passphrase
+            :timestamp timestamp
+            :signature (create-websocket-signature secret timestamp)})))
 
 ;; ## Private endpoints
 
@@ -171,51 +200,51 @@
        http/request))
 
 (defn get-account-history
-  [client account-id & [paging-options]]
+  [client account-id & paging-opts]
   (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
-       (append-query-params paging-options)
+       (append-query-params paging-opts)
        (sign-request client)
        http/request))
 
 (defn get-account-holds
-  [client account-id & [paging-options]]
+  [client account-id & paging-opts]
   (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
-       (append-query-params paging-options)
+       (append-query-params paging-opts)
        (sign-request client)
        http/request))
 
 (defn place-order
-  [client side product-id & [options]]
-  (let [body (merge options {:side side
+  [client side product-id & opts]
+  (let [body (merge opts {:side side
                              :product_id (clojure.string/upper-case product-id)})]
     (->> (build-post-request (str (:url client) "/orders") body)
          (sign-request client)
          http/request)))
 
 (defn place-limit-order
-  [client side product-id price size & [options]]
-  (place-order client side product-id (merge options {:price price}
-                                                     :size size
+  [client side product-id price size & opts]
+  (place-order client side product-id (merge opts {:price price}
+                                                  :size size
                                                       :type "limit")))
 
 (defn place-market-order
-  [client side product-id & [options]]
-  (place-order client side product-id (merge options {:type "market"})))
+  [client side product-id & opts]
+  (place-order client side product-id (merge opts {:type "market"})))
 
 (defn place-stop-order
-  [client side product-id price & [options]]
-  (place-order client side product-id (merge options {:type "stop"}
+  [client side product-id price & opts]
+  (place-order client side product-id (merge opts {:type "stop"}
                                                :price price)))
 
 (defn get-orders
-  [client & {:keys [statuses] :as options}]
+  [client & {:keys [statuses] :as opts}]
   (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))
-        rest-options (dissoc options :statuses)]
+        rest-opts (dissoc opts :statuses)]
     (->> (build-get-request (str (:url client)
                                  "/orders"
                                  (when-not (clojure.string/blank? query-string) "?")
                                  query-string))
-         (append-query-params rest-options)
+         (append-query-params rest-opts)
          (sign-request client)
          http/request)))
 
@@ -226,7 +255,7 @@
        http/request))
 
 (defn cancel-all
-  [client & [product-id]]
+  [client & product-id]
   (->> (build-delete-request 
           (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
        (sign-request client)
@@ -239,9 +268,9 @@
        http/request))
 
 (defn get-fills
-  [client & [options]]
+  [client & opts]
   (->> (build-get-request (str (:url client) "/fills"))
-       (append-query-params options)
+       (append-query-params opts)
        (sign-request client)
        http/request))
 
@@ -290,8 +319,8 @@
        http/request))
 
 (defn generate-fills-report
-  [client start-date end-date product-id & [options]]
-  (let [params (merge options
+  [client start-date end-date product-id & opts]
+  (let [params (merge opts
                       {:type "fills"
                        :start_date start-date
                        :end_date end-date
@@ -301,8 +330,8 @@
          http/request)))
 
 (defn generate-account-report
-  [client start-date end-date account-id & [options]]
-  (let [params (merge options 
+  [client start-date end-date account-id & opts]
+  (let [params (merge opts 
                       {:type "account"
                        :start_date start-date
                        :end_date end-date
@@ -328,34 +357,36 @@
 (def default-channels ["full"])
 
 (defn- get-subscribe-message
-  [options]
-  {:type "subscribe" 
-   :product_ids (:product_ids options) 
-   :channels (or (:channels options) default-channels)})
+  [opts]
+  (let [message {:type "subscribe" 
+                 :product_ids (:product_ids opts) 
+                 :channels (or (:channels opts) default-channels)}]
+    (if (contains-many? opts :key :secret :passphrase)
+      (sign-message message opts)
+      message)))
 
 (defn- get-unsubscribe-message
-  [options]
+  [product_ids & channels]
   {:type "unsubscribe" 
-   :product_ids (:product_ids options) 
-   :channels (:channels options)})
+   :product_ids product_ids 
+   :channels channels})
 
-;; - `options` will take the following shape
+;; - `opts` will take the following shape
 ;; {:product_ids
-;;  :channels
-;;  :signature
-;;  :key
-;;  :passphrase
-;;  :timestamp}
-
+;;  :channels (optional)
+;;  :url (optional)
+;;  :key (optional)
+;;  :secret (optional)
+;;  :passphrase (optional)}
 (defn subscribe
-  [connection options]
-  (->> (get-subscribe-message options)
+  [connection opts]
+  (->> (get-subscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
 (defn unsubscribe
-  [connection options]
-  (->> (get-unsubscribe-message options)
+  [connection opts]
+  (->> (get-unsubscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
@@ -364,46 +395,39 @@
   (ws/close connection))
 
 (defn- get-socket-connection
-  [url callbacks]
+  [url opts]
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
       url
       :client client
-      :on-connect (or (:on-connect callbacks) (constantly nil))
-      :on-receive (or (:on-receive callbacks) (constantly nil))
-      :on-close (or (:on-close callbacks) (constantly nil))
-      :on-error (or (:on-error callbacks) (constantly nil)))))
+      :on-connect (or (:on-connect opts) (constantly nil))
+      :on-receive (or (:on-receive opts) (constantly nil))
+      :on-close (or (:on-close opts) (constantly nil))
+      :on-error (or (:on-error opts) (constantly nil)))))
 
-;; - `options` will take the following shape
-;; {:channels
-;;  :signature
-;;  :key
-;;  :passphrase
-;;  :timestamp}
 ;; - `callbacks` will take the following shape
-;; {:on-connect
+;; {}
+;; - `opts` will take the following shape
+;; {:channels
+;;  :sandbox
+;;  :on-connect
 ;;  :on-receive
 ;;  :on-close
-;;  :on-error}
+;;  :on-error
+;;  :key
+;;  :secret
+;;  :passphrase}
 (defn create-websocket-connection
-  [url product_ids options callbacks]
-  (let [connection (get-socket-connection url callbacks)]
+  [product_ids & [opts]]
+  (let [url (if (:sandbox opts) sandbox-websocket-url websocket-url)
+        connection (get-socket-connection url opts)]
     ;; subscribe immediately so the connection isn't lost
-    (subscribe connection (merge {:product_ids product_ids} options))
+    (subscribe connection (merge {:product_ids product_ids} opts))
     connection))
 
-;; for testing
 
-(def conn (create-websocket-connection "wss://ws-feed-public.sandbox.gdax.com"
-                                       ["btc-usd"] 
-                                       {:channels ["heartbeat"]}
-                                       {:on-receive #(clojure.pprint/pprint (json->edn %))}))
 
-(close conn)
 
-(subscribe conn {:channels [{:name "heartbeat" :product_ids ["eth-usd"]}]})
-
-(unsubscribe conn {:channels [{:name "heartbeat" :product_ids ["btc-usd"]}]})
 
