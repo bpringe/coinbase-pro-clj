@@ -1,9 +1,8 @@
 # gdax-clj
 
-A Clojure wrapper for the GDAX API. This is currently a WIP. Just about all HTTP endpoints are complete and soon I'll begin work on the websocket feed.
+A Clojure wrapper for the GDAX API. This is currently a WIP. Almost all HTTP endpoints (public and private) have been mapped, and support for public and private websocket feeds is complete.
 
 Upcoming additions:
-- Websocket feed
 - Tests
 - Documentation for installation / usage
 - Upload to Clojars
