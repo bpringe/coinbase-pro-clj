@@ -26,6 +26,11 @@
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
 (def default-channels ["full"])
 
+(def my-client {:url sandbox-rest-url
+                :key (env :key)
+                :secret (env :secret)
+                :passphrase (env :passphrase)})
+
 ;; ## Public endpoints
 
 ;; - `client` will take the following shape
@@ -37,6 +42,8 @@
 (defn get-time
   [client]
   (http/request (build-get-request (str (:url client) "/time"))))
+
+;(get-time my-client)
 
 (defn get-products
   [client]
@@ -98,53 +105,69 @@
        http/request))
 
 (defn get-account-history
-  [client account-id & paging-opts]
-  (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
-       (append-query-params paging-opts)
-       (sign-request client)
-       http/request))
+  ([client account-id]
+   (get-account-history client account-id {}))
+  ([client account-id & [paging-opts]]
+   (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
+        (append-query-params paging-opts)
+        (sign-request client)
+        http/request)))
 
 (defn get-account-holds
-  [client account-id & paging-opts]
-  (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
-       (append-query-params paging-opts)
-       (sign-request client)
-       http/request))
+  ([client account-id]
+   (get-account-holds client account-id {}))
+  ([client account-id & [paging-opts]]
+   (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
+        (append-query-params paging-opts)
+        (sign-request client)
+        http/request)))
 
 (defn place-order
-  [client side product-id & opts]
-  (let [body (merge opts {:side side
-                             :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request (str (:url client) "/orders") body)
-         (sign-request client)
-         http/request)))
+  ([client side product-id]
+   (place-order client side product-id {}))
+  ([client side product-id & [opts]]
+   (let [body (merge opts {:side side
+                              :product_id (clojure.string/upper-case product-id)})]
+     (->> (build-post-request (str (:url client) "/orders") body)
+          (sign-request client)
+          http/request))))
 
 (defn place-limit-order
-  [client side product-id price size & opts]
-  (place-order client side product-id (merge opts {:price price}
-                                                  :size size
-                                                      :type "limit")))
+  ([client side product-id price size]
+   (place-limit-order client side product-id price size {}))
+  ([client side product-id price size & [opts]]
+   (place-order client side product-id (merge opts {:price price
+                                                    :size size
+                                                    :type "limit"}))))
 
 (defn place-market-order
-  [client side product-id & opts]
-  (place-order client side product-id (merge opts {:type "market"})))
+  ([client side product-id]
+   (place-market-order client side product-id {}))
+  ([client side product-id & [opts]]
+   (place-order client side product-id (merge opts {:type "market"}))))
 
 (defn place-stop-order
-  [client side product-id price & opts]
-  (place-order client side product-id (merge opts {:type "stop"}
-                                               :price price)))
+  ([client side product-id price]
+   (place-stop-order client side product-id price {}))
+  ([client side product-id price & [opts]]
+   (place-order client side product-id (merge opts {:type "stop"
+                                                    :price price}))))
 
 (defn get-orders
-  [client & {:keys [statuses] :as opts}]
-  (let [query-string (clojure.string/join "&" (map #(str "status=" (name %)) statuses))
-        rest-opts (dissoc opts :statuses)]
+  ([client]
+   (get-orders client {:status ["all"]}))
+  ([client opts]
+   (let [query-string (clojure.string/join "&" (map #(str "status=" %) (:status opts)))
+         rest-opts (dissoc opts :status)]
     (->> (build-get-request (str (:url client)
                                  "/orders"
                                  (when-not (clojure.string/blank? query-string) "?")
                                  query-string))
          (append-query-params rest-opts)
          (sign-request client)
-         http/request)))
+         http/request))))
+
+;(get-orders my-client)
 
 (defn cancel-order
   [client order-id]
