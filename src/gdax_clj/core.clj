@@ -26,10 +26,15 @@
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
 (def default-channels ["full"])
 
-(def my-client {:url sandbox-rest-url
+(def my-client {:url rest-url
                 :key (env :key)
                 :secret (env :secret)
                 :passphrase (env :passphrase)})
+
+(def my-sandbox-client {:url sandbox-rest-url
+                        :key (env :sandbox-key)
+                        :secret (env :sandbox-secret)
+                        :passphrase (env :sandbox-passphrase)})
 
 ;; ## Public endpoints
 
@@ -42,8 +47,6 @@
 (defn get-time
   [client]
   (http/request (build-get-request (str (:url client) "/time"))))
-
-;(get-time my-client)
 
 (defn get-products
   [client]
