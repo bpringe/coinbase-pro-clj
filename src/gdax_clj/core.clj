@@ -177,11 +177,13 @@
        http/request))
 
 (defn cancel-all
-  [client & product-id]
-  (->> (build-delete-request 
+  ([client]
+   (cancel-all client nil))  
+  ([client product-id]
+   (->> (build-delete-request 
           (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
-       (sign-request client)
-       http/request))
+        (sign-request client)
+        http/request)))
 
 (defn get-order
   [client order-id]
@@ -190,17 +192,21 @@
        http/request))
 
 (defn get-fills
-  [client & opts]
-  (->> (build-get-request (str (:url client) "/fills"))
-       (append-query-params opts)
-       (sign-request client)
-       http/request))
+  ([client]
+   (get-fills client {}))
+  ([client opts]
+   (->> (build-get-request (str (:url client) "/fills"))
+        (append-query-params opts)
+        (sign-request client)
+        http/request)))
 
 (defn get-payment-methods
   [client]
   (->> (build-get-request (str (:url client) "/payment-methods"))
        (sign-request client)
        http/request))
+
+(pprint (get-payment-methods my-client))
 
 (defn get-coinbase-accounts
   [client]
@@ -241,26 +247,30 @@
        http/request))
 
 (defn generate-fills-report
-  [client start-date end-date product-id & opts]
-  (let [params (merge opts
-                      {:type "fills"
-                       :start_date start-date
-                       :end_date end-date
-                       :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request (str (:url client) "/reports") params)
-         (sign-request client)
-         http/request)))
+  ([client start-date end-date product-id]
+   (generate-fills-report client start-date end-date product-id {}))
+  ([client start-date end-date product-id opts]
+   (let [params (merge opts
+                       {:type "fills"
+                        :start_date start-date
+                        :end_date end-date
+                        :product_id (clojure.string/upper-case product-id)})]
+     (->> (build-post-request (str (:url client) "/reports") params)
+          (sign-request client)
+          http/request))))
 
 (defn generate-account-report
-  [client start-date end-date account-id & opts]
-  (let [params (merge opts 
-                      {:type "account"
-                       :start_date start-date
-                       :end_date end-date
-                       :account_id (clojure.string/upper-case account-id)})]
-    (->> (build-post-request (str (:url client) "/reports") params)
-         (sign-request client)
-         http/request)))
+  ([client start-date end-date account-id]
+   (generate-account-report client start-date end-date account-id {}))
+  ([client start-date end-date account-id opts]
+   (let [params (merge opts 
+                       {:type "account"
+                        :start_date start-date
+                        :end_date end-date
+                        :account_id (clojure.string/upper-case account-id)})]
+     (->> (build-post-request (str (:url client) "/reports") params)
+          (sign-request client)
+          http/request))))
 
 (defn get-report-status
   [client report-id]
@@ -286,10 +296,12 @@
       message)))
 
 (defn- get-unsubscribe-message
-  [product_ids & channels]
-  {:type "unsubscribe" 
-   :product_ids product_ids 
-   :channels channels})
+  ([product_ids]
+   (get-unsubscribe-message product_ids []))
+  ([product_ids channels]
+   {:type "unsubscribe" 
+    :product_ids product_ids 
+    :channels channels}))
 
 ;; - `opts` will take the following shape
 ;; {:product_ids
@@ -337,12 +349,14 @@
 ;;  :secret
 ;;  :passphrase}
 (defn create-websocket-connection
-  [product_ids & [opts]]
-  (let [url (if (:sandbox opts) sandbox-websocket-url websocket-url)
-        connection (get-socket-connection url opts)]
-    ;; subscribe immediately so the connection isn't lost
-    (subscribe connection (merge {:product_ids product_ids} opts))
-    connection))
+  ([product_ids]
+   (create-websocket-connection product_ids {}))
+  ([product_ids opts]
+   (let [url (if (:sandbox opts) sandbox-websocket-url websocket-url)
+         connection (get-socket-connection url opts)]
+     ;; subscribe immediately so the connection isn't lost
+     (subscribe connection (merge {:product_ids product_ids} opts))
+     connection)))
 
 
 
