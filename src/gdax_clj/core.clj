@@ -206,7 +206,15 @@
        (sign-request client)
        http/request))
 
-(pprint (get-payment-methods my-client))
+(defn deposit-from-payment-method
+  [client amount currency payment-method-id]
+  (->> (build-post-request 
+         (str (:url client) "/deposits/payment-method") 
+         {:amount amount
+          :currency (clojure.string/upper-case currency)
+          :payment_method_id payment-method-id})
+       (sign-request client)
+       http/request))
 
 (defn get-coinbase-accounts
   [client]
