@@ -216,6 +216,16 @@
        (sign-request client)
        http/request))
 
+(defn withdraw-to-payment-method
+  [client amount currency payment-method-id]
+  (->> (build-post-request 
+          (str (:url client) "/withdrawals/payment-method")
+          {:amount amount
+           :currency (clojure.string/upper-case currency)
+           :payment_method_id payment-method-id})
+       (sign-request client)
+       http/request))
+
 (defn get-coinbase-accounts
   [client]
   (->> (build-get-request (str (:url client) "/coinbase-accounts"))
