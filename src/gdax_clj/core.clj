@@ -24,7 +24,7 @@
 (def websocket-url "wss://ws-feed.gdax.com")
 (def sandbox-rest-url "https://public.sandbox.gdax.com")
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
-(def default-channels ["full"])
+(def default-channels ["heartbeat"])
 
 (def my-client {:url rest-url
                 :key (env :key)
@@ -110,7 +110,7 @@
 (defn get-account-history
   ([client account-id]
    (get-account-history client account-id {}))
-  ([client account-id & [paging-opts]]
+  ([client account-id paging-opts]
    (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
         (append-query-params paging-opts)
         (sign-request client)
@@ -119,7 +119,7 @@
 (defn get-account-holds
   ([client account-id]
    (get-account-holds client account-id {}))
-  ([client account-id & [paging-opts]]
+  ([client account-id paging-opts]
    (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
         (append-query-params paging-opts)
         (sign-request client)
@@ -128,7 +128,7 @@
 (defn place-order
   ([client side product-id]
    (place-order client side product-id {}))
-  ([client side product-id & [opts]]
+  ([client side product-id opts]
    (let [body (merge opts {:side side
                               :product_id (clojure.string/upper-case product-id)})]
      (->> (build-post-request (str (:url client) "/orders") body)
@@ -138,7 +138,7 @@
 (defn place-limit-order
   ([client side product-id price size]
    (place-limit-order client side product-id price size {}))
-  ([client side product-id price size & [opts]]
+  ([client side product-id price size opts]
    (place-order client side product-id (merge opts {:price price
                                                     :size size
                                                     :type "limit"}))))
@@ -146,13 +146,13 @@
 (defn place-market-order
   ([client side product-id]
    (place-market-order client side product-id {}))
-  ([client side product-id & [opts]]
+  ([client side product-id opts]
    (place-order client side product-id (merge opts {:type "market"}))))
 
 (defn place-stop-order
   ([client side product-id price]
    (place-stop-order client side product-id price {}))
-  ([client side product-id price & [opts]]
+  ([client side product-id price opts]
    (place-order client side product-id (merge opts {:type "stop"
                                                     :price price}))))
 
@@ -169,8 +169,6 @@
          (append-query-params rest-opts)
          (sign-request client)
          http/request))))
-
-;(get-orders my-client)
 
 (defn cancel-order
   [client order-id]
