@@ -252,8 +252,6 @@
        (sign-request client)
        http/request))
 
-;; TODO: try this with actual API instead of sandbax. If it works, also implement
-;; deposit and withdraw for payment methods too
 (defn withdraw-to-crypto-address
   [client amount currency crypto-address]
   (->> (build-post-request
