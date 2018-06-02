@@ -11,6 +11,9 @@
                  [clj-time "0.14.2"]
                  [org.clojure/data.codec "0.1.1"]
                  [stylefruits/gniazdo "1.0.1"]
-                 [org.clojure/data.json "0.2.6"]]
+                 [org.clojure/data.json "0.2.6"]
+                 [expectations "2.2.0-rc3"]]
   :plugins [[lein-environ "1.1.0"]
-            [lein-gorilla "0.4.0"]])
+            [lein-gorilla "0.4.0"]
+            [lein-expectations "0.0.8"]
+            [lein-autoexpect "1.9.0"]])

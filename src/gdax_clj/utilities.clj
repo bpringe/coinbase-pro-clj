@@ -25,21 +25,24 @@
    :as :json})
 
 (defn build-get-request
-  [url & opts]
-  (merge (build-base-request "GET" url)
-         opts))
+  [url]
+  (build-base-request "GET" url))
 
 (defn build-post-request
-  [url body & opts]
-  (merge (build-base-request "POST" url)
-         {:body (edn->json body)
-          :content-type :json}
-         opts))
+  ([url body]
+   (build-post-request url body {}))
+  ([url body opts]
+   (merge (build-base-request "POST" url)
+          {:body (edn->json body)
+           :content-type :json}
+          opts)))
 
 (defn build-delete-request
-  [url & opts]
-  (merge (build-base-request "DELETE" url)
-         opts))
+  ([url]
+   (build-delete-request url {}))
+  ([url opts]
+   (merge (build-base-request "DELETE" url)
+          opts)))
 
 (defn map->query-string
   [params]
