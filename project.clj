@@ -12,8 +12,7 @@
                  [org.clojure/data.codec "0.1.1"]
                  [stylefruits/gniazdo "1.0.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [expectations "2.2.0-rc3"]]
+                 [org.clojure/test.check "0.9.0"]]
   :plugins [[lein-environ "1.1.0"]
             [lein-gorilla "0.4.0"]
-            [lein-expectations "0.0.8"]
-            [lein-autoexpect "1.9.0"]])
+            [com.jakemccrary/lein-test-refresh "0.22.0"]])

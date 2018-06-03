@@ -1,5 +1,7 @@
 (ns gdax-clj.core-test
-  (:require [expectations :refer :all]
-            [gdax-clj.core :refer :all]))
+  (:require [clojure.test :refer :all]))
 
-(expect nil? nil)
+(deftest test-if-equal
+  (is (= 1 1)))
+
+    
