@@ -4,7 +4,7 @@
 
 (deftest test-edn->json
   (is (= "{\"hello\":\"world\"}"
-         (edn->json {:hello "world"}))))
+         (edn->json {:hello "world}))))
 
 (deftest test-json->edn
   (is (= {:hello "world"}
