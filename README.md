@@ -1,6 +1,6 @@
 # gdax-clj
 
-![](https://travis-ci.com/bpringe/gdax-clj.svg?branch=master)
+[![Build Status](https://travis-ci.com/bpringe/gdax-clj.svg?branch=master)](https://travis-ci.com/bpringe/gdax-clj)
 
 A Clojure wrapper for the GDAX API. This is a WIP. All HTTP endpoints have been mapped, and support for public and private websocket feeds is complete.
 
