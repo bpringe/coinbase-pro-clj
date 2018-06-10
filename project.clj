@@ -9,7 +9,9 @@
                  [org.clojure/data.codec "0.1.1"]
                  [stylefruits/gniazdo "1.0.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.clojure/test.check "0.9.0"]]
+                 [org.clojure/test.check "0.9.0"]
+                 [pjstadig/humane-test-output "0.8.3"]]
+  :injections [(require 'pjstadig.humane-test-output)
+               (pjstadig.humane-test-output/activate!)]
   :plugins [[lein-environ "1.1.0"]
-            [lein-gorilla "0.4.0"]
             [com.jakemccrary/lein-test-refresh "0.22.0"]])
