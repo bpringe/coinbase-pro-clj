@@ -15,5 +15,4 @@ Upcoming additions in no particular order:
 
 Copyright © 2018 Brandon Ringe
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT License
