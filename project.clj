@@ -1,8 +1,5 @@
-(defproject gdax-clj "0.1.0-SNAPSHOT"
+(defproject gdax-clojure "0.1.0"
   :description "A Clojure wrapper for the GDAX API."
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [pandect "0.6.1"]
                  [clj-http "3.7.0"]

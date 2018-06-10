@@ -1,4 +1,4 @@
-(ns gdax-clj.utilities
+(ns gdax-clojure.utilities
   (:require
     [clojure.data.json :as json]))
 

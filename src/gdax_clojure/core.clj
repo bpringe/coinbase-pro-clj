@@ -1,8 +1,8 @@
-(ns gdax-clj.core
+(ns gdax-clojure.core
   "Public and private endpoint functions and websocket feed functionality."
   (:require 
-    [gdax-clj.utilities :refer :all]
-    [gdax-clj.authentication :refer :all]
+    [gdax-clojure.utilities :refer :all]
+    [gdax-clojure.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
     [environ.core :refer [env]]

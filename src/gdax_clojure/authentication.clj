@@ -1,6 +1,6 @@
-(ns gdax-clj.authentication
+(ns gdax-clojure.authentication
   (:require
-    [gdax-clj.utilities :refer :all]
+    [gdax-clojure.utilities :refer :all]
     [clojure.data.codec.base64 :as b64]
     [pandect.algo.sha256 :refer :all]))
 
