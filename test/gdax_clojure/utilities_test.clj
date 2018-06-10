@@ -1,6 +1,6 @@
-(ns gdax-clj.utilities-test
+(ns gdax-clojure.utilities-test
   (:require [clojure.test :refer :all]
-            [gdax-clj.utilities :refer :all]))
+            [gdax-clojure.utilities :refer :all]))
 
 (deftest test-edn->json
   (is (= "{\"hello\":\"world\"}"

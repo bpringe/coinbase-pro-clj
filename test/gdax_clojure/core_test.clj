@@ -1,4 +1,4 @@
-(ns gdax-clj.core-test
+(ns gdax-clojure.core-test
   (:require [clojure.test :refer :all]))
 
 (deftest test-if-equal
