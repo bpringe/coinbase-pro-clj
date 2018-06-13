@@ -56,14 +56,6 @@
         "without options")
     (is (= (merge expected options) (build-delete-request url options))
         "with options")))
-                         
-(deftest test-map->query-string
-  (let [params {:a 1 :b 2 :c "hello"}
-        expected "a=1&b=2&c=hello"]
-    (is (= expected (map->query-string params))
-      "with non-empty map")
-    (is (= "" (map->query-string {}))
-      "with empty map")))
                   
 (deftest test-append-query-params
   (let [base-url "https://test"]
@@ -71,5 +63,6 @@
            (append-query-params {:a 1 :b "hello"} {:url base-url}))
       "without existing query params on url")
     (is (= {:url (str base-url "?answer=42&message=hello")}
-           (append-query-params {:message "hello"} {:url (str base-url "?answer=42")})))))
+           (append-query-params {:message "hello"} {:url (str base-url "?answer=42")}))
+        "with existing query params on url")))
 

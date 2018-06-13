@@ -1,6 +1,7 @@
 (ns gdax-clojure.utilities
   (:require
-    [clojure.data.json :as json]))
+    [clojure.data.json :as json]
+    [ring.util.codec :refer [form-encode]]))
 
 (defn edn->json
   [edn-content]
@@ -44,12 +45,6 @@
    (merge (build-base-request "DELETE" url)
           opts)))
 
-(defn map->query-string
-  [params]
-  (clojure.string/join "&"
-    (for [[k v] params]
-      (str (name k) "=" (java.net.URLEncoder/encode (str v))))))
-
 (defn append-query-params
   [query-params request]
   (if (empty? query-params)
@@ -57,5 +52,5 @@
     (update-in request [:url] 
       #(str % 
         (if (clojure.string/includes? % "?") "&" "?") 
-        (map->query-string query-params)))))
+        (form-encode query-params)))))
 
