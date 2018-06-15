@@ -5,35 +5,35 @@
 (def default-options {:accept :json
                       :as :json})
 
-(deftest test-edn->json
+(deftest edn->json-test
   (is (= "{\"hello\":\"world\"}"
          (edn->json {:hello "world"}))))
 
-(deftest test-json->edn
+(deftest json->edn-test
   (is (= {:hello "world"}
          (json->edn "{\"hello\":\"world\"}"))))
 
-(deftest test-contains-many?
+(deftest contains-many?-test
   (let [coll {:a 1 :b 2 :c 3}]
     (is (contains-many? coll :a :b))))
 
-(deftest test-get-timestamp
+(deftest get-timestamp-test
   (let [current-time-secs (quot (System/currentTimeMillis) 1000)
         time (get-timestamp)]
     (is (< (- time current-time-secs) 1))))
 
-(deftest test-build-base-request
+(deftest build-base-request-test
   (let [method "GET"
         url "test url"
         expected (merge {:method method :url url} default-options)]
     (is (= expected (build-base-request method url)))))
 
-(deftest test-build-get-request
+(deftest build-get-request-test
   (let [url "test url"
         expected (merge {:method "GET" :url url} default-options)]
     (is (= expected (build-get-request url)))))
 
-(deftest test-build-post-request
+(deftest build-post-request-test
   (let [url "test url"
         body {:hello "world"}
         options {:some "options"}
@@ -48,7 +48,7 @@
            (build-post-request url body options))
         "with options")))
 
-(deftest test-build-delete-request
+(deftest build-delete-request-test
   (let [url "test url"
         options {:some "options"}
         expected (merge {:method "DELETE" :url url} default-options)]
@@ -57,7 +57,7 @@
     (is (= (merge expected options) (build-delete-request url options))
         "with options")))
                   
-(deftest test-append-query-params
+(deftest append-query-params-test
   (let [base-url "https://test"]
     (is (= {:url (str base-url "?a=1&b=hello")} 
            (append-query-params {:a 1 :b "hello"} {:url base-url}))
