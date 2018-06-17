@@ -4,10 +4,6 @@
     [clojure.data.codec.base64 :as b64]
     [pandect.algo.sha256 :refer :all]))
 
-(defn- parse-request-path
-  [request-url]
-  (second (clojure.string/split request-url #".com")))
-
 (defn- create-prehash-string
   [timestamp request]
   (str timestamp (clojure.string/upper-case (:method request)) 
@@ -33,7 +29,7 @@
 
 (defn sign-request 
   [client request]
-  (let [timestamp (quot (System/currentTimeMillis) 1000)]
+  (let [timestamp (get-timestamp)]
     (update-in request [:headers] merge {"CB-ACCESS-KEY" (:key client)
                                          "CB-ACCESS-SIGN" (create-http-signature (:secret client) timestamp request)
                                          "CB-ACCESS-TIMESTAMP" timestamp

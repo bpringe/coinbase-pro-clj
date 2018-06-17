@@ -22,6 +22,9 @@
         time (get-timestamp)]
     (is (< (- time current-time-secs) 1))))
 
+(deftest parse-request-path-test
+  (is (= "/hello/world" (parse-request-path "http://www.google.com/hello/world"))))
+
 (deftest build-base-request-test
   (let [method "GET"
         url "test url"

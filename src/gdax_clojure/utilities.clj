@@ -18,6 +18,10 @@
   []
   (quot (System/currentTimeMillis) 1000))
 
+(defn parse-request-path
+  [request-url]
+  (second (clojure.string/split request-url #".com")))
+
 (defn build-base-request
   [method url]
   {:method method
