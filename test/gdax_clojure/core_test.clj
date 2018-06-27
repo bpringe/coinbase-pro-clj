@@ -3,11 +3,15 @@
     [clojure.test :refer :all]
     [gdax-clojure.core :refer :all]))
 
+;; Redefine clj-http.client/request to be a function that returns its argument
+;; Then in tests we verify that the return of the called function equals the
+;; expected argument to clj-http.client/request. This also verifies that the
+;; clj-http.client/request call was returned from the function being tested.
 (defn http-fixture 
   [test-function]
-  (with-redefs [clj-http.client/request (fn [request] request)]
+  (with-redefs [clj-http.client/request #(identity %)]
     (test-function)))
-
+    
 (use-fixtures :each http-fixture)
 
 (def test-client {:url "https://public.sandbox.gdax.com"
@@ -23,7 +27,7 @@
           :accept :json
           :as :json}
          (get-time test-client))))
-
+        
 (deftest get-products-test
   (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products", :accept :json, :as :json} 
          (get-products test-client))))
