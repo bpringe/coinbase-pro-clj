@@ -46,3 +46,12 @@
   (is (= {:method "GET", :url "https://api.gdax.com/products/ETH-USD/ticker", :accept :json, :as :json}
          (get-ticker my-client "ETH-USD"))))
 
+(deftest get-ticker-test
+  (testing "without paging options"
+    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/ticker", :accept :json, :as :json}
+           (get-ticker test-client "ETH-USD"))))
+  (testing "with paging options"
+    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/ticker?before=1&after=2&limit=3", :accept :json, :as :json}
+           (get-ticker test-client "ETH-USD" {:before 1 :after 2 :limit 3})))))
+
+
