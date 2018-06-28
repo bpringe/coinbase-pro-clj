@@ -70,10 +70,13 @@
         http/request)))
 
 (defn get-trades
-  [client product-id]
-  (->> (str (:url client) "/products/" product-id "/trades")
-       build-get-request
-       http/request))
+  ([client product-id]
+   (get-trades client product-id {}))
+  ([client product-id paging-opts]
+   (->> (str (:url client) "/products/" product-id "/trades")
+        build-get-request
+        (append-query-params paging-opts)
+        http/request)))
     
 (defn get-historic-rates
   ([client product-id]

@@ -33,11 +33,9 @@
          (get-products test-client))))
 
 (deftest get-order-book-test
-
   (testing "without level argument"
     (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/book?level=1", :accept :json, :as :json}
            (get-order-book test-client "ETH-USD"))))
-
   (testing "with level argument"
     (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/book?level=2", :accept :json, :as :json} 
            (get-order-book test-client "ETH-USD" 2)))))
@@ -51,7 +49,15 @@
     (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/ticker", :accept :json, :as :json}
            (get-ticker test-client "ETH-USD"))))
   (testing "with paging options"
-    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/ticker?before=1&after=2&limit=3", :accept :json, :as :json}
-           (get-ticker test-client "ETH-USD" {:before 1 :after 2 :limit 3})))))
+    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/ticker?before=3&after=1&limit=3", :accept :json, :as :json}
+           (get-ticker test-client "ETH-USD" {:before 3 :after 1 :limit 3})))))
 
-
+(deftest get-trades-test
+  (testing "without paging options"
+    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/trades", :accept :json, :as :json}
+           (get-trades test-client "ETH-USD"))))
+  (testing "with paging options"
+    (is (= {:method "GET", :url "https://public.sandbox.gdax.com/products/ETH-USD/trades?before=3&after=1&limit=3", :accept :json, :as :json}
+           (get-trades test-client "ETH-USD" {:before 3 :after 1 :limit 3})))))
+      
+    
