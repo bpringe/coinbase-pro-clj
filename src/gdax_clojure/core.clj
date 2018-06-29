@@ -20,10 +20,10 @@
                     :1h 3600
                     :6h 21600
                     :1d 86400})
-(def rest-url "https://api.gdax.com")
+(def rest-url "https://api.pro.coinbase.com")
 (def websocket-url "wss://ws-feed.gdax.com")
-(def sandbox-rest-url "https://public.sandbox.gdax.com")
-(def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
+(def sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
+(def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
 (def my-client {:url rest-url
@@ -80,14 +80,16 @@
     
 (defn get-historic-rates
   ([client product-id]
-   (->> (str (:url client) "/products/" product-id "/stats")
+   (get-historic-rates client product-id {}))
+  ([client product-id opts]
+   (->> (str (:url client) "/products/" product-id "/candles")
         build-get-request
-        http/request))
-  ([client product-id start end granularity]
-   (->> (str (:url client) "/products/" product-id "/candles?start="
-           start "&end=" end "&granularity=" granularity)
-        build-get-request
+        (append-query-params opts)
         http/request)))
+
+; (get-historic-rates my-client "ETH-USD" {:start "2018-06-01" 
+;                                          :end "2018-06-27"
+;                                          :granularity (:1d granularities)})
        
 (defn get-product-stats
   [client product-id]
