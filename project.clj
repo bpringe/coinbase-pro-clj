@@ -15,4 +15,5 @@
   :injections [(require 'pjstadig.humane-test-output)
                (pjstadig.humane-test-output/activate!)]
   :plugins [[lein-environ "1.1.0"]
-            [com.jakemccrary/lein-test-refresh "0.22.0"]])
+            [com.jakemccrary/lein-test-refresh "0.22.0"]
+            [lein-gorilla "0.4.0"]])

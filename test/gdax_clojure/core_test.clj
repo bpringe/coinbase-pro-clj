@@ -102,7 +102,19 @@
            (get-account-holds test-client "test-account-id" {:before 3 :after 1 :limit 3})))))
 
 (deftest place-order-test
+  (is (= {:method "POST", :url "https://example.com/orders", :accept :json, :as :json, :body "{\"price\":5000,\"size\":1,\"type\":\"limit\",\"side\":\"buy\",\"product_id\":\"BTC-USD\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "xxorIBVzpPSlinbxQOrWc1xieL9QdJ0OIj0AWMlfv/A=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (place-order test-client "buy" "BTC-USD" {:price 5000 :size 1 :type "limit"}))))
+ 
+(deftest place-limit-order-test
   (testing "without options"
-    ())
+    (is (= {:method "POST", :url "https://example.com/orders", :accept :json, :as :json, :body "{\"price\":5000,\"size\":1,\"type\":\"limit\",\"side\":\"buy\",\"product_id\":\"BTC-USD\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "xxorIBVzpPSlinbxQOrWc1xieL9QdJ0OIj0AWMlfv/A=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+           (place-limit-order test-client "buy"  "BTC-USD" 5000 1))))
   (testing "with options"
+    (is (= {:method "POST", :url "https://example.com/orders", :accept :json, :as :json, :body "{\"time_in_force\":\"GTC\",\"post_only\":true,\"price\":5000,\"size\":1,\"type\":\"limit\",\"side\":\"buy\",\"product_id\":\"BTC-USD\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "x4ylTGFhrg7recYUdnIBfg6ybKWzF516n2bKmxQ47HE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+           (place-limit-order test-client "buy" "BTC-USD" 5000 1 {:time_in_force "GTC" :post_only true})))))
+
+(deftest place-market-order-test
+  (testing "with options"
+    (prn ()))
+  (testing "without options"
     ()))
