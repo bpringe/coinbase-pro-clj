@@ -9,7 +9,6 @@ Upcoming additions in no particular order:
 - Tests
 - Documentation
 - Upload to Clojars
-- Continous integration
 
 ## License
 
