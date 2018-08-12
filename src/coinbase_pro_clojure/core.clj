@@ -19,7 +19,7 @@
                     :1d 86400})
 (def rest-url "https://api.pro.coinbase.com")
 (def websocket-url "wss://ws-feed.gdax.com")
-(def sandbox-rest-url "https://api-public.sandbox.gdax.com");;"https://api-public.sandbox.pro.coinbase.com");;
+(def sandbox-rest-url "https://api-public.sandbox.gdax.com")
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
@@ -60,19 +60,19 @@
 (defn get-ticker
   ([client product-id]
    (get-ticker client product-id {}))
-  ([client product-id paging-opts]
+  ([client product-id opts]
    (->> (str (:url client) "/products/" product-id "/ticker")
         build-get-request
-        (append-query-params paging-opts)
+        (append-query-params opts)
         http/request)))
 
 (defn get-trades
   ([client product-id]
    (get-trades client product-id {}))
-  ([client product-id paging-opts]
+  ([client product-id opts]
    (->> (str (:url client) "/products/" product-id "/trades")
         build-get-request
-        (append-query-params paging-opts)
+        (append-query-params opts)
         http/request)))
     
 (defn get-historic-rates
@@ -107,7 +107,7 @@
        (sign-request client)
        http/request))
 
-(defn get-account-by-id
+(defn get-account
   [client account-id]
   (->> (build-get-request (str (:url client) "/accounts/" account-id))
        (sign-request client)
@@ -132,6 +132,7 @@
         http/request)))
 
 ;; opts must be passed here - see shortcut functions
+;; TODO: Refactor to take only client and options map
 (defn place-order
   [client side product-id opts]
   (let [body (merge opts {:side side
@@ -140,6 +141,7 @@
          (sign-request client)
          http/request)))
 
+;; TODO: Remove in favor of using place-order with options map
 (defn place-limit-order
   ([client side product-id price size]
    (place-limit-order client side product-id price size {}))
@@ -149,10 +151,12 @@
                                                     :type "limit"}))))
 
 ;; opts must be passed here
+;; TODO: Refactor to two methods, buy and sell, that take only client and options map
 (defn place-market-order
   ([client side product-id opts]
    (place-order client side product-id (merge opts {:type "market"}))))
 
+;; TODO: remove in favor of place-order with options map
 (defn place-stop-order
   "stop-type must be either \"loss\" or \"entry\""
   ([client side product-id size stop-price stop-type]
@@ -213,6 +217,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn deposit-from-payment-method
   [client amount currency payment-method-id]
   (->> (build-post-request 
@@ -223,6 +228,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn withdraw-to-payment-method
   [client amount currency payment-method-id]
   (->> (build-post-request 
@@ -239,6 +245,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn deposit-from-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
@@ -249,6 +256,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn withdraw-to-coinbase
   [client amount currency coinbase-account-id]
   (->> (build-post-request 
@@ -259,6 +267,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn withdraw-to-crypto-address
   [client amount currency crypto-address]
   (->> (build-post-request
@@ -269,6 +278,7 @@
        (sign-request client)
        http/request))
 
+;; TODO: Refactor to take only client and options map
 (defn generate-fills-report
   ([client start-date end-date product-id]
    (generate-fills-report client start-date end-date product-id {}))
@@ -282,6 +292,7 @@
           (sign-request client)
           http/request))))
 
+;; TODO: Refactor to take only client and options map
 (defn generate-account-report
   ([client start-date end-date account-id]
    (generate-account-report client start-date end-date account-id {}))
@@ -294,6 +305,7 @@
      (->> (build-post-request (str (:url client) "/reports") params)
           (sign-request client)
           http/request))))
+
 
 (defn get-report-status
   [client report-id]
