@@ -1,4 +1,4 @@
-(defproject gdax-clojure "0.1.0"
+(defproject coinbase-pro-clojure "0.1.0"
   :description "A Clojure wrapper for the GDAX API."
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [pandect "0.6.1"]

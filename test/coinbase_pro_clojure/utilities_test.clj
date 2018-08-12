@@ -1,6 +1,6 @@
-(ns gdax-clojure.utilities-test
+(ns coinbase-pro-clojure.utilities-test
   (:require [clojure.test :refer :all]
-            [gdax-clojure.utilities :refer :all]))
+            [coinbase-pro-clojure.utilities :refer :all]))
 
 (def default-options {:accept :json
                       :as :json})

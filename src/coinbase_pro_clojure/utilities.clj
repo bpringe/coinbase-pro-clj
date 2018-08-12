@@ -1,4 +1,4 @@
-(ns gdax-clojure.utilities
+(ns coinbase-pro-clojure.utilities
   (:require
     [clojure.data.json :as json]
     [ring.util.codec :refer [form-encode]]))

@@ -1,8 +1,8 @@
-(ns gdax-clojure.core
+(ns coinbase-pro-clojure.core
   "Public and private endpoint functions and websocket feed functionality."
   (:require 
-    [gdax-clojure.utilities :refer :all]
-    [gdax-clojure.authentication :refer :all]
+    [coinbase-pro-clojure.utilities :refer :all]
+    [coinbase-pro-clojure.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
     [environ.core :refer [env]]
@@ -19,7 +19,7 @@
                     :1d 86400})
 (def rest-url "https://api.pro.coinbase.com")
 (def websocket-url "wss://ws-feed.gdax.com")
-(def sandbox-rest-url "https://api-public.sandbox.gdax.com")
+(def sandbox-rest-url "https://api-public.sandbox.gdax.com");;"https://api-public.sandbox.pro.coinbase.com");;
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
@@ -154,11 +154,14 @@
    (place-order client side product-id (merge opts {:type "market"}))))
 
 (defn place-stop-order
-  ([client side product-id price]
-   (place-stop-order client side product-id price {}))
-  ([client side product-id price opts]
-   (place-order client side product-id (merge opts {:type "stop"
-                                                    :price price}))))
+  "stop-type must be either \"loss\" or \"entry\""
+  ([client side product-id size stop-price stop-type]
+   (place-stop-order client side product-id size stop-price stop-type {}))
+  ([client side product-id size stop-price stop-type opts]
+   (place-order client side product-id (merge opts {:price stop-price
+                                                    :size size
+                                                    :stop stop-type
+                                                    :stop_price stop-price}))))
 
 (defn get-orders
   ([client]

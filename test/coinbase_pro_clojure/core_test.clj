@@ -1,7 +1,7 @@
-(ns gdax-clojure.core-test
+(ns coinbase-pro-clojure.core-test
   (:require 
     [clojure.test :refer :all]
-    [gdax-clojure.core :refer :all]))
+    [coinbase-pro-clojure.core :refer :all]))
 
 ;; Redefine clj-http.client/request to be a function that returns its argument
 ;; Then in tests we verify that the return of the called function equals the
@@ -10,7 +10,7 @@
 (defn http-fixture 
   [test-function]
   (with-redefs [clj-http.client/request #(identity %)
-                gdax-clojure.utilities/get-timestamp (constantly 1530305893)]
+                coinbase-pro-clojure.utilities/get-timestamp (constantly 1530305893)]
     (test-function)))
     
 (use-fixtures :each http-fixture)
@@ -114,7 +114,8 @@
            (place-limit-order test-client "buy" "BTC-USD" 5000 1 {:time_in_force "GTC" :post_only true})))))
 
 (deftest place-market-order-test
-  (testing "with options"
-    (prn ()))
-  (testing "without options"
-    ()))
+  (is (= {:method "POST", :url "https://example.com/orders", :accept :json, :as :json, :body "{\"size\":4,\"type\":\"market\",\"side\":\"sell\",\"product_id\":\"BTC-USD\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "NVezZxERvaZZgVmaednPVayTmJMYUlESOfeaqjup27M=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (place-market-order test-client "sell" "btc-usd" {:size 4}))))
+
+(deftest place-stop-order-test
+  (prn (place-stop-order test-client "buy" "BTC-USD" 2 4000 "entry")))

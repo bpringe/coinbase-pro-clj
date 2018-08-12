@@ -1,6 +1,6 @@
-(ns gdax-clojure.authentication
+(ns coinbase-pro-clojure.authentication
   (:require
-    [gdax-clojure.utilities :refer :all]
+    [coinbase-pro-clojure.utilities :refer :all]
     [clojure.data.codec.base64 :as b64]
     [pandect.algo.sha256 :refer :all]))
 
