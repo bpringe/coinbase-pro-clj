@@ -1,29 +1,26 @@
-(ns gdax-clojure.core
+(ns coinbase-pro-clojure.core
   "Public and private endpoint functions and websocket feed functionality."
   (:require 
-    [gdax-clojure.utilities :refer :all]
-    [gdax-clojure.authentication :refer :all]
+    [coinbase-pro-clojure.utilities :refer :all]
+    [coinbase-pro-clojure.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
     [environ.core :refer [env]]
-    [clj-time.core :as t]
-    [clojure.pprint :refer [pprint]]
     [gniazdo.core :as ws])
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;; ## Convenience/config values
-
 (def granularities {:1m 60
                     :5m 300
                     :15m 900
                     :1h 3600
                     :6h 21600
                     :1d 86400})
-(def rest-url "https://api.gdax.com")
+(def rest-url "https://api.pro.coinbase.com")
 (def websocket-url "wss://ws-feed.gdax.com")
-(def sandbox-rest-url "https://public.sandbox.gdax.com")
-(def sandbox-websocket-url "wss://ws-feed-public.sandbox.gdax.com")
+(def sandbox-rest-url "https://api-public.sandbox.gdax.com");;"https://api-public.sandbox.pro.coinbase.com");;
+(def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
 (def my-client {:url rest-url
@@ -61,27 +58,36 @@
         http/request)))
   
 (defn get-ticker
-  [client product-id]
-  (->> (str (:url client) "/products/" product-id "/ticker")
-       build-get-request
-       http/request))
+  ([client product-id]
+   (get-ticker client product-id {}))
+  ([client product-id paging-opts]
+   (->> (str (:url client) "/products/" product-id "/ticker")
+        build-get-request
+        (append-query-params paging-opts)
+        http/request)))
 
 (defn get-trades
-  [client product-id]
-  (->> (str (:url client) "/products/" product-id "/trades")
-       build-get-request
-       http/request))
+  ([client product-id]
+   (get-trades client product-id {}))
+  ([client product-id paging-opts]
+   (->> (str (:url client) "/products/" product-id "/trades")
+        build-get-request
+        (append-query-params paging-opts)
+        http/request)))
     
 (defn get-historic-rates
   ([client product-id]
-   (->> (str (:url client) "/products/" product-id "/stats")
+   (get-historic-rates client product-id {}))
+  ([client product-id opts]
+   (->> (str (:url client) "/products/" product-id "/candles")
         build-get-request
-        http/request))
-  ([client product-id start end granularity]
-   (->> (str (:url client) "/products/" product-id "/candles?start="
-           start "&end=" end "&granularity=" granularity)
-        build-get-request
+        (append-query-params opts)
         http/request)))
+
+;; Example
+; (get-historic-rates my-client "ETH-USD" {:start "2018-06-01" 
+;                                          :end "2018-06-27"
+;                                          :granularity (:1d granularities)})
        
 (defn get-product-stats
   [client product-id]
@@ -125,15 +131,14 @@
         (sign-request client)
         http/request)))
 
+;; opts must be passed here - see shortcut functions
 (defn place-order
-  ([client side product-id]
-   (place-order client side product-id {}))
-  ([client side product-id opts]
-   (let [body (merge opts {:side side
-                              :product_id (clojure.string/upper-case product-id)})]
-     (->> (build-post-request (str (:url client) "/orders") body)
-          (sign-request client)
-          http/request))))
+  [client side product-id opts]
+  (let [body (merge opts {:side side
+                          :product_id (clojure.string/upper-case product-id)})]
+    (->> (build-post-request (str (:url client) "/orders") body)
+         (sign-request client)
+         http/request)))
 
 (defn place-limit-order
   ([client side product-id price size]
@@ -143,18 +148,20 @@
                                                     :size size
                                                     :type "limit"}))))
 
+;; opts must be passed here
 (defn place-market-order
-  ([client side product-id]
-   (place-market-order client side product-id {}))
   ([client side product-id opts]
    (place-order client side product-id (merge opts {:type "market"}))))
 
 (defn place-stop-order
-  ([client side product-id price]
-   (place-stop-order client side product-id price {}))
-  ([client side product-id price opts]
-   (place-order client side product-id (merge opts {:type "stop"
-                                                    :price price}))))
+  "stop-type must be either \"loss\" or \"entry\""
+  ([client side product-id size stop-price stop-type]
+   (place-stop-order client side product-id size stop-price stop-type {}))
+  ([client side product-id size stop-price stop-type opts]
+   (place-order client side product-id (merge opts {:price stop-price
+                                                    :size size
+                                                    :stop stop-type
+                                                    :stop_price stop-price}))))
 
 (defn get-orders
   ([client]
