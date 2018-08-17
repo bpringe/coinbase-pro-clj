@@ -23,10 +23,10 @@
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
-(def my-client {:url rest-url
-                :key (env :key)
-                :secret (env :secret)
-                :passphrase (env :passphrase)})
+; (def my-client {:url rest-url
+;                 :key (env :key)
+;                 :secret (env :secret)
+;                 :passphrase (env :passphrase)})
 
 (def my-sandbox-client {:url sandbox-rest-url
                         :key (env :sandbox-key)
@@ -88,7 +88,7 @@
 ; (get-historic-rates my-client "ETH-USD" {:start "2018-06-01" 
 ;                                          :end "2018-06-27"
 ;                                          :granularity (:1d granularities)})
-       
+
 (defn get-product-stats
   [client product-id]
   (->> (str (:url client) "/products/" product-id "/stats")
@@ -131,41 +131,11 @@
         (sign-request client)
         http/request)))
 
-;; opts must be passed here - see shortcut functions
-;; TODO: Refactor to take only client and options map
 (defn place-order
-  [client side product-id opts]
-  (let [body (merge opts {:side side
-                          :product_id (clojure.string/upper-case product-id)})]
-    (->> (build-post-request (str (:url client) "/orders") body)
+  [client opts]
+    (->> (build-post-request (str (:url client) "/orders") opts)
          (sign-request client)
-         http/request)))
-
-;; TODO: Remove in favor of using place-order with options map
-(defn place-limit-order
-  ([client side product-id price size]
-   (place-limit-order client side product-id price size {}))
-  ([client side product-id price size opts]
-   (place-order client side product-id (merge opts {:price price
-                                                    :size size
-                                                    :type "limit"}))))
-
-;; opts must be passed here
-;; TODO: Refactor to two methods, buy and sell, that take only client and options map
-(defn place-market-order
-  ([client side product-id opts]
-   (place-order client side product-id (merge opts {:type "market"}))))
-
-;; TODO: remove in favor of place-order with options map
-(defn place-stop-order
-  "stop-type must be either \"loss\" or \"entry\""
-  ([client side product-id size stop-price stop-type]
-   (place-stop-order client side product-id size stop-price stop-type {}))
-  ([client side product-id size stop-price stop-type opts]
-   (place-order client side product-id (merge opts {:price stop-price
-                                                    :size size
-                                                    :stop stop-type
-                                                    :stop_price stop-price}))))
+         http/request))
 
 (defn get-orders
   ([client]
@@ -245,67 +215,41 @@
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn deposit-from-coinbase
-  [client amount currency coinbase-account-id]
+  [client opts]
   (->> (build-post-request 
          (str (:url client) "/deposits/coinbase-account") 
-         {:amount amount
-          :currency (clojure.string/upper-case currency)
-          :coinbase_account_id coinbase-account-id})
+         opts)
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn withdraw-to-coinbase
-  [client amount currency coinbase-account-id]
+  [client opts]
   (->> (build-post-request 
          (str (:url client) "/withdrawals/coinbase-account")
-         {:amount amount
-          :currency (clojure.string/upper-case currency)
-          :coinbase_account_id coinbase-account-id})
+         opts)
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn withdraw-to-crypto-address
-  [client amount currency crypto-address]
+  [client opts]
   (->> (build-post-request
          (str (:url client) "/withdrawals/crypto")
-         {:amount amount
-          :currency (clojure.string/upper-case currency)
-          :crypto_address crypto-address})
+         opts)
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn generate-fills-report
-  ([client start-date end-date product-id]
-   (generate-fills-report client start-date end-date product-id {}))
-  ([client start-date end-date product-id opts]
-   (let [params (merge opts
-                       {:type "fills"
-                        :start_date start-date
-                        :end_date end-date
-                        :product_id (clojure.string/upper-case product-id)})]
-     (->> (build-post-request (str (:url client) "/reports") params)
+  [client opts]
+     (->> (build-post-request (str (:url client) "/reports") opts)
           (sign-request client)
-          http/request))))
+          http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn generate-account-report
-  ([client start-date end-date account-id]
-   (generate-account-report client start-date end-date account-id {}))
-  ([client start-date end-date account-id opts]
-   (let [params (merge opts 
-                       {:type "account"
-                        :start_date start-date
-                        :end_date end-date
-                        :account_id (clojure.string/upper-case account-id)})]
-     (->> (build-post-request (str (:url client) "/reports") params)
-          (sign-request client)
-          http/request))))
-
+  [client opts]
+  (->> (build-post-request (str (:url client) "/reports") opts)
+       (sign-request client)
+       http/request))
 
 (defn get-report-status
   [client report-id]
