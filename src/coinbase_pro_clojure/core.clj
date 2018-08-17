@@ -187,25 +187,19 @@
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn deposit-from-payment-method
-  [client amount currency payment-method-id]
+  [client opts]
   (->> (build-post-request 
          (str (:url client) "/deposits/payment-method") 
-         {:amount amount
-          :currency (clojure.string/upper-case currency)
-          :payment_method_id payment-method-id})
+         opts)
        (sign-request client)
        http/request))
 
-;; TODO: Refactor to take only client and options map
 (defn withdraw-to-payment-method
-  [client amount currency payment-method-id]
+  [client opts]
   (->> (build-post-request 
           (str (:url client) "/withdrawals/payment-method")
-          {:amount amount
-           :currency (clojure.string/upper-case currency)
-           :payment_method_id payment-method-id})
+          opts)
        (sign-request client)
        http/request))
 
