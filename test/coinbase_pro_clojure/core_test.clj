@@ -110,3 +110,16 @@
                                    :size 1
                                    :type "limit"}))))
 
+(deftest get-orders-test
+  (testing "without options"
+    (is (= {:method "GET", :url "https://example.com/orders?status=all", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1sgQol+/+Wqw2hVsdTTo3vVJwycF2JuaTCNQOmQ1k6I=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+           (get-orders test-client))))
+  (testing "with options"
+    (is (= {:method "GET", :url "https://example.com/orders?status=open&status=pending", :accept :json, :as :json, :headers
+            {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "CgDB2CdjPT1B5Xg3ULdqfVF6h0+BCYMKNNP0X56dAMw=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+           (get-orders test-client {:status ["open" "pending"]})))))
+
+(deftest cancel-order-test
+  (is (= {:method "DELETE", :url "https://example.com/orders/order-id", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "+HssA1c69im8yImwgAYP7BSp5pNlVEnZihU43QrFGk4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (cancel-order test-client "order-id"))))
+
