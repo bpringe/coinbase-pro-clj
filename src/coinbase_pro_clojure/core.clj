@@ -28,7 +28,7 @@
 ;                 :secret (env :secret)
 ;                 :passphrase (env :passphrase)})
 
-(def my-sandbox-client {:url sandbox-rest-url
+(def test-client {:url sandbox-rest-url
                         :key (env :sandbox-key)
                         :secret (env :sandbox-secret)
                         :passphrase (env :sandbox-passphrase)})
@@ -133,9 +133,9 @@
 
 (defn place-order
   [client opts]
-    (->> (build-post-request (str (:url client) "/orders") opts)
-         (sign-request client)
-         http/request))
+  (->> (build-post-request (str (:url client) "/orders") opts)
+       (sign-request client)
+       http/request))
 
 (defn get-orders
   ([client]
@@ -235,9 +235,9 @@
 
 (defn generate-fills-report
   [client opts]
-     (->> (build-post-request (str (:url client) "/reports") opts)
-          (sign-request client)
-          http/request))
+  (->> (build-post-request (str (:url client) "/reports") opts)
+       (sign-request client)
+       http/request))
 
 (defn generate-account-report
   [client opts]
