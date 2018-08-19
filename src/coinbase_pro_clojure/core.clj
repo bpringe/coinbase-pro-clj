@@ -172,9 +172,8 @@
        (sign-request client)
        http/request))
 
+;; opts must contain either order_id or product_id
 (defn get-fills
-  ([client]
-   (get-fills client {}))
   ([client opts]
    (->> (build-get-request (str (:url client) "/fills"))
         (append-query-params opts)
@@ -189,9 +188,7 @@
 
 (defn deposit-from-payment-method
   [client opts]
-  (->> (build-post-request 
-         (str (:url client) "/deposits/payment-method") 
-         opts)
+  (->> (build-post-request (str (:url client) "/deposits/payment-method") opts)
        (sign-request client)
        http/request))
 

@@ -132,6 +132,60 @@
            (core/cancel-all test-client "BTC-USD")))))
 
 (deftest get-order-test
-  (prn (core/get-order test-client "order-id")))
+  (is (= {:method "GET", :url "https://example.com/orders/order-id", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "46r3AT+BPTbZpO6y6LnUriETvs6vGf+zL+HBm/68ODE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/get-order test-client "order-id"))))
+
+(deftest get-fills-test
+  (is (= {:method "GET", :url "https://example.com/fills?order_id=123", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "WX6ahZnpZn9kPyxalFBV/1Sdq7qtz2ZxT6vqWCZs1es=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/get-fills test-client {:order_id "123"}))))
+
+(deftest get-payment-methods-test
+  (is (= {:method "GET", :url "https://example.com/payment-methods", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "T4GeL7Mvky+MhXD+xhEpWPXP3oBzf4GbfbTJScwzFOs=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/get-payment-methods test-client))))
+
+(deftest deposit-from-payment-method-test
+  (is (= {:method "POST", :url "https://example.com/deposits/payment-method", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "2RRELFmwzewk2gnW+IzUTtl3lNf/kaV1YM7qF56NAZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/deposit-from-payment-method test-client {:amount 100 
+                                                        :currency "USD" 
+                                                        :payment_method_id "123"}))))
+
+(deftest withdraw-to-payment-method-test
+  (is (= {:method "POST", :url "https://example.com/withdrawals/payment-method", :accept :json, :as :json, :body
+          "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "8LcqJCjATrmacKf3dQnQskFGioALMRb8MHMKfY2KxHY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/withdraw-to-payment-method test-client {:amount 100
+                                                       :currency "USD"
+                                                       :payment_method_id "123"}))))
+
+(deftest get-coinbase-accounts-test
+ (is (= {:method "GET", :url "https://example.com/coinbase-accounts", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "lwt4UUQhkuV9A3b7ME2qUesgvZp1g6zg0ikTI8mvv74=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+        (core/get-coinbase-accounts test-client))))
+
+(deftest deposit-from-coinbase-test
+ (is (= {:method "POST", :url "https://example.com/deposits/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "/hFiIV7gf25VVwhw4dGsdBIujDROnJ4HrPRIj0A6GZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+        (core/deposit-from-coinbase test-client {:amount 100
+                                                 :currency "USD"
+                                                 :coinbase_account_id "123"}))))
+
+(deftest withdraw-to-coinbase-test
+  (is (= {:method "POST", :url "https://example.com/withdrawals/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IBJT986bAHr3xDP0vL9Fgg5j5mTaH3G7hB1iPUeXfXw=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/withdraw-to-coinbase test-client {:amount 100
+                                                 :currency "USD"
+                                                 :coinbase_account_id "123"}))))
+
+(deftest withdraw-to-crypto-address-test
+  (is (= {:method "POST", :url "https://example.com/withdrawals/crypto", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"BTC\",\"crypto_address\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "L+IPN58ZRMOSNOUH33LBwXlZw9xxu5mixrqVUPkhwcE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/withdraw-to-crypto-address test-client {:amount 100
+                                                       :currency "BTC"
+                                                       :crypto_address "123"}))))
+                                                     
+
+
+
+                                                                                                        
+
+
+
+
+
 
 
