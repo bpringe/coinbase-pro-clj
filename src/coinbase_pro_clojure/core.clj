@@ -29,9 +29,9 @@
 ;                 :passphrase (env :passphrase)})
 
 (def test-client {:url sandbox-rest-url
-                        :key (env :sandbox-key)
-                        :secret (env :sandbox-secret)
-                        :passphrase (env :sandbox-passphrase)})
+                  :key (env :sandbox-key)
+                  :secret (env :sandbox-secret)
+                  :passphrase (env :sandbox-passphrase)})
 
 ;; ## Public endpoints
 
@@ -230,13 +230,7 @@
        (sign-request client)
        http/request))
 
-(defn generate-fills-report
-  [client opts]
-  (->> (build-post-request (str (:url client) "/reports") opts)
-       (sign-request client)
-       http/request))
-
-(defn generate-account-report
+(defn generate-report
   [client opts]
   (->> (build-post-request (str (:url client) "/reports") opts)
        (sign-request client)

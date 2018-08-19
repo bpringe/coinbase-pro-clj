@@ -178,6 +178,22 @@
                                                        :currency "BTC"
                                                        :crypto_address "123"}))))
                                                      
+(deftest generate-report-test
+  (is (= {:method "POST", :url "https://example.com/reports", :accept :json, :as :json, :body "{\"type\":\"fills\",\"product_id\":\"BTC-USD\",\"start_date\":\"2018-1-1\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "Sxmef57/sVxBoo8yR7WrIcwTpm3kpZ7ZzPqclaDEOeY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/generate-report test-client {:type "fills" 
+                                            :product_id "BTC-USD"
+                                            :start_date "2018-1-1"}))))
+
+(deftest get-report-status-test
+  (is (= {:method "GET", :url "https://example.com/reports/123", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IxwWA/IAHNoYKlCTkdsyWLp4/Y73af8rTue37T2BXa4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/get-report-status test-client "123"))))
+
+
+(deftest get-trailing-volume-test
+  (is (= {:method "GET", :url "https://example.com/users/self/trailing-volume", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1kHkV6sb0z8F7mHScmpei/Q5KQB4BsOkYBg4tK06E0E=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
+         (core/get-trailing-volume test-client))))
+
+
 
 
 
