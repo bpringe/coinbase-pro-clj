@@ -323,6 +323,7 @@
     (subscribe connection opts)
     connection))
 
+;; example code
 (def websocket-opts {:product_ids ["BTC-USD"]
                      :url websocket-url
                      :on-receive #(prn 'received %)})
