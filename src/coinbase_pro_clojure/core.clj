@@ -18,12 +18,12 @@
                     :6h 21600
                     :1d 86400})
 (def rest-url "https://api.pro.coinbase.com")
-(def websocket-url "wss://ws-feed.gdax.com")
-(def sandbox-rest-url "https://api-public.sandbox.gdax.com")
+(def websocket-url "wss://ws-feed.pro.coinbase.com")
+(def sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
 (def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def default-channels ["heartbeat"])
 
-; (def my-client {:url rest-url
+; (def client {:url rest-url
 ;                 :key (env :key)
 ;                 :secret (env :secret)
 ;                 :passphrase (env :passphrase)})
@@ -267,6 +267,8 @@
     :product_ids product_ids 
     :channels channels}))
 
+(def spy #(do (println "DEBUG:" %) %))
+
 ;; - `opts` will take the following shape
 ;; {:product_ids
 ;;  :channels (optional)
@@ -279,6 +281,7 @@
        edn->json
        (ws/send-msg connection)))
 
+
 (defn unsubscribe
   [connection opts]
   (->> (get-unsubscribe-message opts)
@@ -290,12 +293,12 @@
   (ws/close connection))
 
 (defn- get-socket-connection
-  [url opts]
+  [opts]
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
-      url
+      (:url opts)
       :client client
       :on-connect (or (:on-connect opts) (constantly nil))
       :on-receive (or (:on-receive opts) (constantly nil))
@@ -303,26 +306,29 @@
       :on-error (or (:on-error opts) (constantly nil)))))
       
 ;; - `opts` will take the following shape
-;; {:channels
-;;  :sandbox
+;; {:channels (optional)
+;;  :product_ids
+;;  :url
 ;;  :on-connect
 ;;  :on-receive
 ;;  :on-close
 ;;  :on-error
-;;  :key
-;;  :secret
-;;  :passphrase}
+;;  :key (optional)
+;;  :secret (optional)
+;;  :passphrase (optional)}
 (defn create-websocket-connection
-  ([product_ids]
-   (create-websocket-connection product_ids {}))
-  ([product_ids opts]
-   (let [url (if (:sandbox opts) sandbox-websocket-url websocket-url)
-         connection (get-socket-connection url opts)]
-     ;; subscribe immediately so the connection isn't lost
-     (subscribe connection (merge {:product_ids product_ids} opts))
-     connection)))
+  [opts]
+  (let [connection (get-socket-connection opts)]
+    ;; subscribe immediately so the connection isn't lost
+    (subscribe connection opts)
+    connection))
+
+(def websocket-opts {:product_ids ["BTC-USD"]
+                     :url websocket-url
+                     :on-receive #(prn 'received %)})
+(comment
+  (def conn (create-websocket-connection websocket-opts)))
 
 
-
-
-
+(close conn)
+  
