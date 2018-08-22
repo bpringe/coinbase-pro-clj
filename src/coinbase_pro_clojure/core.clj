@@ -326,10 +326,9 @@
 ;; example code
 (def websocket-opts {:product_ids ["BTC-USD"]
                      :url websocket-url
-                     :on-receive #(prn 'received %)})
+                     :on-receive (fn [x] (prn 'received x))})
 (comment
-  (def conn (create-websocket-connection websocket-opts)))
-
-
-(close conn)
+  (def conn (create-websocket-connection websocket-opts))
   
+  (close conn))
+
