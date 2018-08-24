@@ -134,59 +134,56 @@
   (is (= 1 (core/get-fills test-client {:order_id "123"})))
   (is (= @last-request {:method "GET", :url "https://example.com/fills?order_id=123", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "WX6ahZnpZn9kPyxalFBV/1Sdq7qtz2ZxT6vqWCZs1es=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest get-payment-methods-test
-;   (is (= {:method "GET", :url "https://example.com/payment-methods", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "T4GeL7Mvky+MhXD+xhEpWPXP3oBzf4GbfbTJScwzFOs=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/get-payment-methods test-client))))
+(deftest get-payment-methods-test
+  (is (= 1 (core/get-payment-methods test-client)))
+  (is (= @last-request {:method "GET", :url "https://example.com/payment-methods", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "T4GeL7Mvky+MhXD+xhEpWPXP3oBzf4GbfbTJScwzFOs=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest deposit-from-payment-method-test
-;   (is (= {:method "POST", :url "https://example.com/deposits/payment-method", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "2RRELFmwzewk2gnW+IzUTtl3lNf/kaV1YM7qF56NAZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/deposit-from-payment-method test-client {:amount 100 
-;                                                         :currency "USD" 
-;                                                         :payment_method_id "123"}))))
+(deftest deposit-from-payment-method-test
+  (is (= 1 (core/deposit-from-payment-method test-client {:amount 100 :currency "USD" :payment_method_id "123"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/deposits/payment-method", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "2RRELFmwzewk2gnW+IzUTtl3lNf/kaV1YM7qF56NAZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest withdraw-to-payment-method-test
-;   (is (= {:method "POST", :url "https://example.com/withdrawals/payment-method", :accept :json, :as :json, :body
-;           "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "8LcqJCjATrmacKf3dQnQskFGioALMRb8MHMKfY2KxHY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/withdraw-to-payment-method test-client {:amount 100
-;                                                        :currency "USD"
-;                                                        :payment_method_id "123"}))))
+(deftest withdraw-to-payment-method-test
+  (is (= 1 (core/withdraw-to-payment-method test-client {:amount 100
+                                                         :currency "USD"
+                                                         :payment_method_id "123"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/withdrawals/payment-method", :accept :json, :as :json, :body
+                        "{\"amount\":100,\"currency\":\"USD\",\"payment_method_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "8LcqJCjATrmacKf3dQnQskFGioALMRb8MHMKfY2KxHY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest get-coinbase-accounts-test
-;  (is (= {:method "GET", :url "https://example.com/coinbase-accounts", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "lwt4UUQhkuV9A3b7ME2qUesgvZp1g6zg0ikTI8mvv74=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;         (core/get-coinbase-accounts test-client))))
+(deftest get-coinbase-accounts-test
+  (is (= 1 (core/get-coinbase-accounts test-client)))
+  (is (= @last-request {:method "GET", :url "https://example.com/coinbase-accounts", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "lwt4UUQhkuV9A3b7ME2qUesgvZp1g6zg0ikTI8mvv74=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest deposit-from-coinbase-test
-;  (is (= {:method "POST", :url "https://example.com/deposits/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "/hFiIV7gf25VVwhw4dGsdBIujDROnJ4HrPRIj0A6GZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;         (core/deposit-from-coinbase test-client {:amount 100
-;                                                  :currency "USD"
-;                                                  :coinbase_account_id "123"}))))
+(deftest deposit-from-coinbase-test
+  (is (= 1 (core/deposit-from-coinbase test-client {:amount 100
+                                                    :currency "USD"
+                                                    :coinbase_account_id "123"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/deposits/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "/hFiIV7gf25VVwhw4dGsdBIujDROnJ4HrPRIj0A6GZ4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest withdraw-to-coinbase-test
-;   (is (= {:method "POST", :url "https://example.com/withdrawals/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IBJT986bAHr3xDP0vL9Fgg5j5mTaH3G7hB1iPUeXfXw=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/withdraw-to-coinbase test-client {:amount 100
-;                                                  :currency "USD"
-;                                                  :coinbase_account_id "123"}))))
+(deftest withdraw-to-coinbase-test
+  (is (= 1 (core/withdraw-to-coinbase test-client {:amount 100
+                                                   :currency "USD"
+                                                   :coinbase_account_id "123"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/withdrawals/coinbase-account", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"USD\",\"coinbase_account_id\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IBJT986bAHr3xDP0vL9Fgg5j5mTaH3G7hB1iPUeXfXw=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest withdraw-to-crypto-address-test
-;   (is (= {:method "POST", :url "https://example.com/withdrawals/crypto", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"BTC\",\"crypto_address\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "L+IPN58ZRMOSNOUH33LBwXlZw9xxu5mixrqVUPkhwcE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/withdraw-to-crypto-address test-client {:amount 100
-;                                                        :currency "BTC"
-;                                                        :crypto_address "123"}))))
+(deftest withdraw-to-crypto-address-test
+  (is (= 1 (core/withdraw-to-crypto-address test-client {:amount 100
+                                                         :currency "BTC"
+                                                         :crypto_address "123"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/withdrawals/crypto", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"BTC\",\"crypto_address\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "L+IPN58ZRMOSNOUH33LBwXlZw9xxu5mixrqVUPkhwcE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
                                                      
-; (deftest generate-report-test
-;   (is (= {:method "POST", :url "https://example.com/reports", :accept :json, :as :json, :body "{\"type\":\"fills\",\"product_id\":\"BTC-USD\",\"start_date\":\"2018-1-1\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "Sxmef57/sVxBoo8yR7WrIcwTpm3kpZ7ZzPqclaDEOeY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/generate-report test-client {:type "fills" 
-;                                             :product_id "BTC-USD"
-;                                             :start_date "2018-1-1"}))))
+(deftest generate-report-test
+  (is (= 1 (core/generate-report test-client {:type "fills" 
+                                              :product_id "BTC-USD"
+                                              :start_date "2018-1-1"})))
+  (is (= @last-request {:method "POST", :url "https://example.com/reports", :accept :json, :as :json, :body "{\"type\":\"fills\",\"product_id\":\"BTC-USD\",\"start_date\":\"2018-1-1\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "Sxmef57/sVxBoo8yR7WrIcwTpm3kpZ7ZzPqclaDEOeY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-; (deftest get-report-status-test
-;   (is (= {:method "GET", :url "https://example.com/reports/123", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IxwWA/IAHNoYKlCTkdsyWLp4/Y73af8rTue37T2BXa4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/get-report-status test-client "123"))))
+(deftest get-report-status-test
+  (is (= 1 (core/get-report-status test-client "123")))
+  (is (= @last-request {:method "GET", :url "https://example.com/reports/123", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "IxwWA/IAHNoYKlCTkdsyWLp4/Y73af8rTue37T2BXa4=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-
-; (deftest get-trailing-volume-test
-;   (is (= {:method "GET", :url "https://example.com/users/self/trailing-volume", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1kHkV6sb0z8F7mHScmpei/Q5KQB4BsOkYBg4tK06E0E=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}}
-;          (core/get-trailing-volume test-client))))
+(deftest get-trailing-volume-test
+  (is (= 1 (core/get-trailing-volume test-client)))
+  (is (= @last-request {:method "GET", :url "https://example.com/users/self/trailing-volume", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1kHkV6sb0z8F7mHScmpei/Q5KQB4BsOkYBg4tK06E0E=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
 
 
