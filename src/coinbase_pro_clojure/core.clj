@@ -33,6 +33,12 @@
                   :secret (env :sandbox-secret)
                   :passphrase (env :sandbox-passphrase)})
 
+(defn- send-request
+  [request]
+  (-> request
+      http/request
+      :body))    
+
 ;; ## Public endpoints
 
 ;; - `client` will take the following shape
@@ -43,19 +49,23 @@
 
 (defn get-time
   [client]
-  (http/request (build-get-request (str (:url client) "/time"))))
+  (-> (str (:url client) "/time")
+      build-get-request
+      send-request))
 
 (defn get-products
   [client]
-  (http/request (build-get-request (str (:url client) "/products"))))
+  (-> (str (:url client) "/products")
+      build-get-request
+      send-request))    
 
 (defn get-order-book
   ([client product-id]
    (get-order-book client product-id 1))
   ([client product-id level]
-   (->> (str (:url client) "/products/" product-id "/book?level=" level)
-        build-get-request
-        http/request)))
+   (-> (str (:url client) "/products/" product-id "/book?level=" level)
+       build-get-request
+       send-request)))
   
 (defn get-ticker
   ([client product-id]
@@ -64,7 +74,7 @@
    (->> (str (:url client) "/products/" product-id "/ticker")
         build-get-request
         (append-query-params opts)
-        http/request)))
+        send-request)))
 
 (defn get-trades
   ([client product-id]
@@ -73,7 +83,7 @@
    (->> (str (:url client) "/products/" product-id "/trades")
         build-get-request
         (append-query-params opts)
-        http/request)))
+        send-request)))
     
 (defn get-historic-rates
   ([client product-id]
@@ -82,7 +92,7 @@
    (->> (str (:url client) "/products/" product-id "/candles")
         build-get-request
         (append-query-params opts)
-        http/request)))
+        send-request)))
 
 ;; Example
 ; (get-historic-rates my-client "ETH-USD" {:start "2018-06-01" 
@@ -93,11 +103,11 @@
   [client product-id]
   (->> (str (:url client) "/products/" product-id "/stats")
        build-get-request
-       http/request))
+       send-request))
      
 (defn get-currencies
   [client]
-  (http/request (build-get-request (str (:url client) "/currencies"))))
+  (send-request (build-get-request (str (:url client) "/currencies"))))
 
 ;; ## Private endpoints
 
@@ -105,13 +115,13 @@
   [client]
   (->> (build-get-request (str (:url client) "/accounts"))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-account
   [client account-id]
   (->> (build-get-request (str (:url client) "/accounts/" account-id))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-account-history
   ([client account-id]
@@ -120,7 +130,7 @@
    (->> (build-get-request (str (:url client) "/accounts/" account-id "/ledger"))
         (append-query-params paging-opts)
         (sign-request client)
-        http/request)))
+        send-request)))
 
 (defn get-account-holds
   ([client account-id]
@@ -129,13 +139,13 @@
    (->> (build-get-request (str (:url client) "/accounts/" account-id "/holds"))
         (append-query-params paging-opts)
         (sign-request client)
-        http/request)))
+        send-request)))
 
 (defn place-order
   [client opts]
   (->> (build-post-request (str (:url client) "/orders") opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-orders
   ([client]
@@ -149,13 +159,13 @@
                                  query-string))
          (append-query-params rest-opts)
          (sign-request client)
-         http/request))))
+         send-request))))
 
 (defn cancel-order
   [client order-id]
   (->> (build-delete-request (str (:url client) "/orders/" order-id))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn cancel-all
   ([client]
@@ -164,13 +174,13 @@
    (->> (build-delete-request 
           (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
         (sign-request client)
-        http/request)))
+        send-request)))
 
 (defn get-order
   [client order-id]
   (->> (build-get-request (str (:url client) "/orders/" order-id))
        (sign-request client)
-       http/request))
+       send-request))
 
 ;; opts must contain either order_id or product_id
 (defn get-fills
@@ -178,19 +188,19 @@
    (->> (build-get-request (str (:url client) "/fills"))
         (append-query-params opts)
         (sign-request client)
-        http/request)))
+        send-request)))
 
 (defn get-payment-methods
   [client]
   (->> (build-get-request (str (:url client) "/payment-methods"))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn deposit-from-payment-method
   [client opts]
   (->> (build-post-request (str (:url client) "/deposits/payment-method") opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn withdraw-to-payment-method
   [client opts]
@@ -198,13 +208,13 @@
           (str (:url client) "/withdrawals/payment-method")
           opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-coinbase-accounts
   [client]
   (->> (build-get-request (str (:url client) "/coinbase-accounts"))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn deposit-from-coinbase
   [client opts]
@@ -212,7 +222,7 @@
          (str (:url client) "/deposits/coinbase-account") 
          opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn withdraw-to-coinbase
   [client opts]
@@ -220,7 +230,7 @@
          (str (:url client) "/withdrawals/coinbase-account")
          opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn withdraw-to-crypto-address
   [client opts]
@@ -228,25 +238,25 @@
          (str (:url client) "/withdrawals/crypto")
          opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn generate-report
   [client opts]
   (->> (build-post-request (str (:url client) "/reports") opts)
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-report-status
   [client report-id]
   (->> (build-get-request (str (:url client) "/reports/" report-id))
        (sign-request client)
-       http/request))
+       send-request))
 
 (defn get-trailing-volume
   [client]
   (->> (build-get-request (str (:url client) "/users/self/trailing-volume"))
        (sign-request client)
-       http/request))
+       send-request))
 
 ;; ## Websocket feed
 
