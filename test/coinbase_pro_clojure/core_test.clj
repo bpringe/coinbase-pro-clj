@@ -231,10 +231,11 @@
     (with-redefs [core/subscribe (fn [connection opts] (reset! subscribe-call {:connection connection :opts opts}))]
       (let [opts {:url "example-url" :product_ids ["BTC-USD"]}
             connection (core/create-websocket-connection opts)]
-        (is (true? (instance? org.eclipse.jetty.websocket.client.WebSocketClient (:client connection))))
+        (is (instance? org.eclipse.jetty.websocket.client.WebSocketClient (:client connection)))
         (is (function? (:on-connect connection)))
         (is (function? (:on-receive connection)))
         (is (function? (:on-close connection)))
         (is (function? (:on-error connection)))
         (is (= (:connection @subscribe-call) connection))
-        (is (= (:opts @subscribe-call) opts))))))
+        (is (= (:opts @subscribe-call) opts))
+        (is (= (:url opts) (:url connection)))))))
