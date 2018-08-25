@@ -58,6 +58,7 @@
 (defn get-order-book
   "[API docs](https://docs.pro.coinbase.com/#get-product-order-book)
      ```clojure
+     (get-order-book client \"BTC-USD\")
      (get-order-book client \"BTC-USD\" 2)
      ```"
   ([client product-id]
@@ -68,6 +69,11 @@
        send-request)))
   
 (defn get-ticker
+  "[API docs](https://docs.pro.coinbase.com/#get-product-ticker)
+     ```clojure
+     (get-ticker client \"BTC-USD\")
+     (get-ticker client \"BTC-USD\" {:before 2, :limit 5})
+     ```"
   ([client product-id]
    (get-ticker client product-id {}))
   ([client product-id opts]
