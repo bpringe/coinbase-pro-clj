@@ -1,6 +1,6 @@
-(ns coinbase-pro-clojure.utilities-test
+(ns coinbase-pro-clj.utilities-test
   (:require [clojure.test :refer :all]
-            [coinbase-pro-clojure.utilities :refer :all]))
+            [coinbase-pro-clj.utilities :refer :all]))
 
 (def default-options {:accept :json
                       :as :json})

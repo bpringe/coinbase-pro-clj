@@ -1,8 +1,8 @@
-(ns coinbase-pro-clojure.core
+(ns coinbase-pro-clj.core
   "Public and private endpoint functions and websocket feed functionality."
   (:require 
-    [coinbase-pro-clojure.utilities :refer :all]
-    [coinbase-pro-clojure.authentication :refer :all]
+    [coinbase-pro-clj.utilities :refer :all]
+    [coinbase-pro-clj.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
     [environ.core :refer [env]]

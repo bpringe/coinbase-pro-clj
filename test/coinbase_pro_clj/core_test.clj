@@ -1,7 +1,7 @@
-(ns coinbase-pro-clojure.core-test
+(ns coinbase-pro-clj.core-test
   (:require 
     [clojure.test :refer :all]
-    [coinbase-pro-clojure.core :as core]
+    [coinbase-pro-clj.core :as core]
     [gniazdo.core :as ws]))
 
 (def last-request (atom {}))
@@ -33,7 +33,7 @@
 (defn core-fixture 
   [test-function]
   (with-redefs [clj-http.client/request mock-request
-                coinbase-pro-clojure.utilities/get-timestamp (constantly 1530305893)
+                coinbase-pro-clj.utilities/get-timestamp (constantly 1530305893)
                 gniazdo.core/send-msg mock-send-msg
                 gniazdo.core/close mock-close
                 gniazdo.core/connect mock-connect]
