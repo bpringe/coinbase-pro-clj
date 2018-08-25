@@ -57,10 +57,10 @@
 
 (defn get-order-book
   "[API docs](https://docs.pro.coinbase.com/#get-product-order-book)
-     ```clojure
-     (get-order-book client \"BTC-USD\")
-     (get-order-book client \"BTC-USD\" 2)
-     ```"
+    ```clojure
+    (get-order-book client \"BTC-USD\")
+    (get-order-book client \"BTC-USD\" 2)
+    ```"
   ([client product-id]
    (get-order-book client product-id 1))
   ([client product-id level]
@@ -70,10 +70,10 @@
   
 (defn get-ticker
   "[API docs](https://docs.pro.coinbase.com/#get-product-ticker)
-     ```clojure
-     (get-ticker client \"BTC-USD\")
-     (get-ticker client \"BTC-USD\" {:before 2, :limit 5})
-     ```"
+    ```clojure
+    (get-ticker client \"BTC-USD\")
+    (get-ticker client \"BTC-USD\" {:before 2 :limit 5})
+    ```"
   ([client product-id]
    (get-ticker client product-id {}))
   ([client product-id opts]
@@ -83,6 +83,11 @@
         send-request)))
 
 (defn get-trades
+  "[API docs](https://docs.pro.coinbase.com/#get-trades)
+    ```clojure
+    (get-trades client \"BTC-USD\")
+    (get-trades client \"BTC-USD\" {:before 2 :limit 5})
+    ```"
   ([client product-id]
    (get-trades client product-id {}))
   ([client product-id opts]
@@ -92,6 +97,13 @@
         send-request)))
     
 (defn get-historic-rates
+  "[API docs](https://docs.pro.coinbase.com/#get-historic-rates)
+    ```clojure
+    (get-historic-rates client \"BTC-USD\")
+    (get-historic-rates client \"BTC-USD\" {:start \"2018-06-01\"
+                                            :end \"2018-06-30\"
+                                            :granularity 86400})
+    ```"
   ([client product-id]
    (get-historic-rates client product-id {}))
   ([client product-id opts]
@@ -100,18 +112,21 @@
         (append-query-params opts)
         send-request)))
 
-;; Example
-; (get-historic-rates my-client "ETH-USD" {:start "2018-06-01" 
-;                                          :end "2018-06-27"
-;                                          :granularity (:1d granularities)})
-
-(defn get-product-stats
+(defn get-24hour-stats
+  "[API docs](https://docs.pro.coinbase.com/#get-24hr-stats)
+    ```clojure
+    (get-24hour-stats client \"BTC-USD\")
+    ```"
   [client product-id]
   (->> (str (:url client) "/products/" product-id "/stats")
        build-get-request
        send-request))
      
 (defn get-currencies
+  "[API docs](https://docs.pro.coinbase.com/#get-currencies)
+    ```clojure
+    (get-currencies client)
+    ```"
   [client]
   (send-request (build-get-request (str (:url client) "/currencies"))))
 
