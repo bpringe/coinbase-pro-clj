@@ -277,8 +277,6 @@
     :product_ids product_ids 
     :channels channels}))
 
-(def spy #(do (println "DEBUG:" %) %))
-
 ;; - `opts` will take the following shape
 ;; {:product_ids
 ;;  :channels (optional)
@@ -316,16 +314,17 @@
       :on-error (or (:on-error opts) (constantly nil)))))
       
 ;; - `opts` will take the following shape
-;; {:channels (optional)
+;; {:url
 ;;  :product_ids
-;;  :url
-;;  :on-connect
-;;  :on-receive
-;;  :on-close
-;;  :on-error
+;;  :channels (optional)
 ;;  :key (optional)
 ;;  :secret (optional)
-;;  :passphrase (optional)}
+;;  :passphrase (optional)
+;;  :on-connect (optional)
+;;  :on-receive (optional)
+;;  :on-close (optional)
+;;  :on-error (optional)
+
 (defn create-websocket-connection
   [opts]
   (let [connection (get-socket-connection opts)]

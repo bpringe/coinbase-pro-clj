@@ -1,22 +1,45 @@
 (ns coinbase-pro-clojure.core-test
   (:require 
     [clojure.test :refer :all]
-    [coinbase-pro-clojure.core :as core]))
+    [coinbase-pro-clojure.core :as core]
+    [gniazdo.core :as ws]))
 
 (def last-request (atom {}))
+
+(def subcribe-spy)
 
 (defn mock-request
   [request]
   (reset! last-request request)
   {:body 1})
 
-(defn http-fixture 
+(defn mock-send-msg
+  [connection message]
+  {:connection connection :message message})
+
+(defn mock-close
+  [connection]
+  connection)
+
+(defn mock-connect
+  [url & {:keys [client on-connect on-receive on-close on-error]}]
+  {:url url
+   :client client
+   :on-connect on-connect
+   :on-receive on-receive
+   :on-close on-close
+   :on-error on-error})
+
+(defn core-fixture 
   [test-function]
   (with-redefs [clj-http.client/request mock-request
-                coinbase-pro-clojure.utilities/get-timestamp (constantly 1530305893)]
+                coinbase-pro-clojure.utilities/get-timestamp (constantly 1530305893)
+                gniazdo.core/send-msg mock-send-msg
+                gniazdo.core/close mock-close
+                gniazdo.core/connect mock-connect]
     (test-function)))
     
-(use-fixtures :each http-fixture)
+(use-fixtures :each core-fixture)
 
 (def test-client {:url "https://example.com"
                   :key "testkey"
@@ -186,14 +209,32 @@
   (is (= @last-request {:method "GET", :url "https://example.com/users/self/trailing-volume", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1kHkV6sb0z8F7mHScmpei/Q5KQB4BsOkYBg4tK06E0E=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
 
+;; ## Websocket tests
+                                                                                                  
+(deftest subscribe-test
+  (testing "without channels"
+    (is (= {:connection 1, :message "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"heartbeat\"],\"key\":\"key\",\"passphrase\":\"passphrase\",\"timestamp\":1530305893,\"signature\":\"Z2s3dTmRzmLKtPilRP5H8vuxFYiLe6mN6kVgk+85c+c=\"}"}
+           (core/subscribe 1 {:product_ids ["BTC-USD"] :key "key" :secret "secret" :passphrase "passphrase"}))))
+  (testing "with channels"
+    (is (= {:connection 1, :message "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"fake channel\"],\"key\":\"key\",\"passphrase\":\"passphrase\",\"timestamp\":1530305893,\"signature\":\"Z2s3dTmRzmLKtPilRP5H8vuxFYiLe6mN6kVgk+85c+c=\"}"}
+           (core/subscribe 1 {:product_ids ["BTC-USD"] :channels ["fake channel"] :key "key" :secret "secret" :passphrase "passphrase"})))))
 
+(deftest unsubscribe-test
+  (is (= {:connection 1, :message "{\"type\":\"unsubscribe\",\"product_ids\":{\"product_ids\":[\"BTC-USD\"],\"channels\":[\"fake channel\"]},\"channels\":[]}"}
+         (core/unsubscribe 1 {:product_ids ["BTC-USD"] :channels ["fake channel"]}))))
 
+(deftest close-test
+  (is (= 1 (core/close 1))))
 
-                                                                                                        
-
-
-
-
-
-
-
+(deftest create-websocket-connection-test
+  (let [subscribe-call (atom {})]
+    (with-redefs [core/subscribe (fn [connection opts] (reset! subscribe-call {:connection connection :opts opts}))]
+      (let [opts {:url "example-url" :product_ids ["BTC-USD"]}
+            connection (core/create-websocket-connection opts)]
+        (is (true? (instance? org.eclipse.jetty.websocket.client.WebSocketClient (:client connection))))
+        (is (function? (:on-connect connection)))
+        (is (function? (:on-receive connection)))
+        (is (function? (:on-close connection)))
+        (is (function? (:on-error connection)))
+        (is (= (:connection @subscribe-call) connection))
+        (is (= (:opts @subscribe-call) opts))))))
