@@ -1,5 +1,5 @@
 (defproject coinbase-pro-clj "0.1.0"
-  :description "A Clojure wrapper for the GDAX API."
+  :description "A Clojure wrapper for the Coinbase Pro API (formerly GDAX)."
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [pandect "0.6.1"]
                  [clj-http "3.7.0"]
@@ -16,4 +16,8 @@
                (pjstadig.humane-test-output/activate!)]
   :plugins [[lein-environ "1.1.0"]
             [com.jakemccrary/lein-test-refresh "0.22.0"]
-            [lein-gorilla "0.4.0"]])
+            [lein-gorilla "0.4.0"]]
+  :codox {:namespaces [coinbase-pro-clj.core]
+          :metadata {:doc "FIXME: write docs"
+                     :doc/format :markdown}
+          :output-path "docs"})  

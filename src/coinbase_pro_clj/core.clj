@@ -11,27 +11,21 @@
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;; ## Convenience/config values
-(def granularities {:1m 60
-                    :5m 300
-                    :15m 900
-                    :1h 3600
-                    :6h 21600
-                    :1d 86400})
-(def rest-url "https://api.pro.coinbase.com")
-(def websocket-url "wss://ws-feed.pro.coinbase.com")
-(def sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
-(def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
-(def default-channels ["heartbeat"])
+(def ^:private rest-url "https://api.pro.coinbase.com")
+(def ^:private websocket-url "wss://ws-feed.pro.coinbase.com")
+(def ^:private sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
+(def ^:private sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
+(def ^:private default-channels ["heartbeat"])
 
-; (def client {:url rest-url
-;                 :key (env :key)
-;                 :secret (env :secret)
-;                 :passphrase (env :passphrase)})
+; (def ^:private client {:url rest-url
+;                        :key (env :key)
+;                        :secret (env :secret)
+;                        :passphrase (env :passphrase)})
 
-(def test-client {:url sandbox-rest-url
-                  :key (env :sandbox-key)
-                  :secret (env :sandbox-secret)
-                  :passphrase (env :sandbox-passphrase)})
+(def ^:private test-client {:url sandbox-rest-url
+                            :key (env :sandbox-key)
+                            :secret (env :sandbox-secret)
+                            :passphrase (env :sandbox-passphrase)})
 
 (defn- send-request
   [request]
@@ -48,18 +42,24 @@
 ;;  :passphrase}
 
 (defn get-time
+  "[API docs](https://docs.pro.coinbase.com/#time)"
   [client]
   (-> (str (:url client) "/time")
       build-get-request
       send-request))
 
 (defn get-products
+  "[API docs](https://docs.pro.coinbase.com/#products)"
   [client]
   (-> (str (:url client) "/products")
       build-get-request
       send-request))    
 
 (defn get-order-book
+  "[API docs](https://docs.pro.coinbase.com/#get-product-order-book)
+     ```clojure
+     (get-order-book client \"BTC-USD\" 2)
+     ```"
   ([client product-id]
    (get-order-book client product-id 1))
   ([client product-id level]
