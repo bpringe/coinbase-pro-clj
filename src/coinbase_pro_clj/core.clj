@@ -98,12 +98,12 @@
     
 (defn get-historic-rates
   "[API docs](https://docs.pro.coinbase.com/#get-historic-rates)
-    ```clojure
-    (get-historic-rates client \"BTC-USD\")
-    (get-historic-rates client \"BTC-USD\" {:start \"2018-06-01\"
-                                            :end \"2018-06-30\"
-                                            :granularity 86400})
-    ```"
+```clojure
+(get-historic-rates client \"BTC-USD\")
+(get-historic-rates client \"BTC-USD\" {:start \"2018-06-01\"
+                                        :end \"2018-06-30\"
+                                        :granularity 86400})
+```"
   ([client product-id]
    (get-historic-rates client product-id {}))
   ([client product-id opts]
@@ -123,22 +123,24 @@
        send-request))
      
 (defn get-currencies
-  "[API docs](https://docs.pro.coinbase.com/#get-currencies)
-    ```clojure
-    (get-currencies client)
-    ```"
+  "[API docs](https://docs.pro.coinbase.com/#get-currencies)"
   [client]
   (send-request (build-get-request (str (:url client) "/currencies"))))
 
 ;; ## Private endpoints
 
-(defn get-accounts 
+(defn get-accounts
+  "[API docs](https://docs.pro.coinbase.com/#list-accounts)"
   [client]
   (->> (build-get-request (str (:url client) "/accounts"))
        (sign-request client)
        send-request))
 
 (defn get-account
+  "[API docs](https://docs.pro.coinbase.com/#get-an-account)
+    ```clojure
+    (get-account client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+    ```"
   [client account-id]
   (->> (build-get-request (str (:url client) "/accounts/" account-id))
        (sign-request client)
