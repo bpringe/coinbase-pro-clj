@@ -89,8 +89,8 @@
     (is (= 1 (core/get-historic-rates test-client "ETH-USD" {:start "6-1-18" :end "6-20-18" :granularity "86400"})))
     (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/candles?start=6-1-18&end=6-20-18&granularity=86400", :accept :json, :as :json}))))
 
-(deftest get-product-stats-test
-  (is (= 1 (core/get-product-stats test-client "ETH-USD")))
+(deftest get-24hour-stats-test
+  (is (= 1 (core/get-24hour-stats test-client "ETH-USD")))
   (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/stats", :accept :json, :as :json})))
 
 (deftest get-currencies-test
