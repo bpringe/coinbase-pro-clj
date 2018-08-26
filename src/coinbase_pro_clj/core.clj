@@ -1,5 +1,14 @@
 (ns coinbase-pro-clj.core
-  "Public and private endpoint functions and websocket feed functionality."
+  "Public and private endpoint functions and websocket feed functionality. In all function signatures, client takes the following shape:
+```clojure
+{:url
+ :key (optional)
+ :secret (optional)
+ :passphrase (optional)}
+```
+- `key`, `secret`, and `passphrase` are only required if the request is authenticated. These values can be created in the [API settings](https://pro.coinbase.com/profile/api) of your Coinbase Pro account.
+**Remember not to store these values in an online repository as this will give others access to your account. You could use something like [environ](https://github.com/weavejester/environ)
+to store these values locally outside of your code.**"
   (:require 
     [coinbase-pro-clj.utilities :refer :all]
     [coinbase-pro-clj.authentication :refer :all]
@@ -443,9 +452,9 @@ Opts must contain either :order_id or :product_id.
  :on-close (optional)
  :on-error (optional)}
 ```
-`key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
-`channels `is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
-`on-connect`, `on-receive`, `on-close`, and `on-error` are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the [gniazdo readme](https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options) for details on the callback functions.
+- `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
+- `channels` is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
+- `on-connect`, `on-receive`, `on-close`, and `on-error` are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the [gniazdo readme](https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options) for details on the callback functions.
 ```clojure
 (def conn (create-websocket-connection {:product_ids [\"BTC-USD\"]
                                         :url \"wss://ws-feed.pro.coinbase.com\"
