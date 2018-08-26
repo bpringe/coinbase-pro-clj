@@ -39,12 +39,6 @@ to store these values locally outside of your code.**"
 
 ;; ## Public endpoints
 
-;; - `client` will take the following shape
-;; {:url
-;;  :key
-;;  :secret
-;;  :passphrase}
-
 (defn get-time
   "[API docs](https://docs.pro.coinbase.com/#time)"
   [client]
