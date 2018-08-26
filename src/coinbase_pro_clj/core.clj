@@ -17,11 +17,6 @@
 (def ^:private sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 (def ^:private default-channels ["heartbeat"])
 
-; (def ^:private client {:url rest-url
-;                        :key (env :key)
-;                        :secret (env :secret)
-;                        :passphrase (env :passphrase)})
-
 (def ^:private test-client {:url sandbox-rest-url
                             :key (env :sandbox-key)
                             :secret (env :sandbox-secret)
