@@ -20,4 +20,4 @@
   :codox {:namespaces [coinbase-pro-clj.core]
           :metadata {:doc "FIXME: write docs"
                      :doc/format :markdown}
-          :output-path "docs"})  
+          :output-path "docs"})
