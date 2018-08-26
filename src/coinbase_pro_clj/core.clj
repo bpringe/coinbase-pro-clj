@@ -57,10 +57,10 @@
 
 (defn get-order-book
   "[API docs](https://docs.pro.coinbase.com/#get-product-order-book)
-    ```clojure
-    (get-order-book client \"BTC-USD\")
-    (get-order-book client \"BTC-USD\" 2)
-    ```"
+```clojure
+(get-order-book client \"BTC-USD\")
+(get-order-book client \"BTC-USD\" 2)
+```"
   ([client product-id]
    (get-order-book client product-id 1))
   ([client product-id level]
@@ -70,10 +70,10 @@
   
 (defn get-ticker
   "[API docs](https://docs.pro.coinbase.com/#get-product-ticker)
-    ```clojure
-    (get-ticker client \"BTC-USD\")
-    (get-ticker client \"BTC-USD\" {:before 2 :limit 5})
-    ```"
+```clojure
+(get-ticker client \"BTC-USD\")
+(get-ticker client \"BTC-USD\" {:before 2 :limit 5})
+```"
   ([client product-id]
    (get-ticker client product-id {}))
   ([client product-id opts]
@@ -84,10 +84,10 @@
 
 (defn get-trades
   "[API docs](https://docs.pro.coinbase.com/#get-trades)
-    ```clojure
-    (get-trades client \"BTC-USD\")
-    (get-trades client \"BTC-USD\" {:before 2 :limit 5})
-    ```"
+```clojure
+(get-trades client \"BTC-USD\")
+(get-trades client \"BTC-USD\" {:before 2 :limit 5})
+```"
   ([client product-id]
    (get-trades client product-id {}))
   ([client product-id opts]
@@ -114,9 +114,9 @@
 
 (defn get-24hour-stats
   "[API docs](https://docs.pro.coinbase.com/#get-24hr-stats)
-    ```clojure
-    (get-24hour-stats client \"BTC-USD\")
-    ```"
+```clojure
+(get-24hour-stats client \"BTC-USD\")
+```"
   [client product-id]
   (->> (str (:url client) "/products/" product-id "/stats")
        build-get-request
@@ -138,15 +138,20 @@
 
 (defn get-account
   "[API docs](https://docs.pro.coinbase.com/#get-an-account)
-    ```clojure
-    (get-account client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
-    ```"
+```clojure
+(get-account client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+```"
   [client account-id]
   (->> (build-get-request (str (:url client) "/accounts/" account-id))
        (sign-request client)
        send-request))
 
 (defn get-account-history
+  "[API docs](https://docs.pro.coinbase.com/#get-account-history)
+```clojure
+(get-account-history client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+(get-account-history client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\" {:before 2 :limit 5})
+```"
   ([client account-id]
    (get-account-history client account-id {}))
   ([client account-id paging-opts]
@@ -156,6 +161,11 @@
         send-request)))
 
 (defn get-account-holds
+  "[API docs](https://docs.pro.coinbase.com/#get-holds)
+```clojure
+(get-account-holds client \"BTC-USD\" \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+(get-account-holds client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\" {:before 2 :limit 5})
+```"
   ([client account-id]
    (get-account-holds client account-id {}))
   ([client account-id paging-opts]
@@ -165,12 +175,23 @@
         send-request)))
 
 (defn place-order
+  "[API docs](https://docs.pro.coinbase.com/#place-a-new-order)
+```clojure
+(place-order client {:side \"buy\"
+                     :product_id \"BTC-USD\"
+                     :price 5000
+                     :size 1})
+```"
   [client opts]
   (->> (build-post-request (str (:url client) "/orders") opts)
        (sign-request client)
        send-request))
 
 (defn get-orders
+  "[API docs](https://docs.pro.coinbase.com/#list-orders)
+```clojure
+(get-orders client {:status [\"open\" \"pending\"]})
+```"
   ([client]
    (get-orders client {:status ["all"]}))
   ([client opts]
@@ -185,12 +206,20 @@
          send-request))))
 
 (defn cancel-order
+  "[API docs](https://docs.pro.coinbase.com/#cancel-an-order)
+```clojure
+(cancel-order client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+```"   
   [client order-id]
   (->> (build-delete-request (str (:url client) "/orders/" order-id))
        (sign-request client)
        send-request))
 
 (defn cancel-all
+  "[API docs](https://docs.pro.coinbase.com/#cancel-all)
+```clojure
+(cancel-all client \"BTC-USD\")
+```"   
   ([client]
    (cancel-all client nil))  
   ([client product-id]
@@ -200,6 +229,10 @@
         send-request)))
 
 (defn get-order
+  "[API docs](https://docs.pro.coinbase.com/#get-an-order)
+```clojure
+(get-order client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+```"
   [client order-id]
   (->> (build-get-request (str (:url client) "/orders/" order-id))
        (sign-request client)
@@ -207,6 +240,11 @@
 
 ;; opts must contain either order_id or product_id
 (defn get-fills
+  "[API docs](https://docs.pro.coinbase.com/#list-fills)
+Opts must contain either :order_id or :product_id.
+```clojure
+(get-fills client {:product_id \"BTC-USD\" :before 2})
+```"   
   ([client opts]
    (->> (build-get-request (str (:url client) "/fills"))
         (append-query-params opts)
@@ -214,12 +252,19 @@
         send-request)))
 
 (defn get-payment-methods
+  "[API docs](https://docs.pro.coinbase.com/#list-payment-methods)"
   [client]
   (->> (build-get-request (str (:url client) "/payment-methods"))
        (sign-request client)
        send-request))
 
 (defn deposit-from-payment-method
+  "[API docs](https://docs.pro.coinbase.com/#payment-method)
+```clojure
+(deposit-from-payment-method client {:amount 10
+                                     :currency \"USD\"
+                                     :payment_method_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
+```"
   [client opts]
   (->> (build-post-request (str (:url client) "/deposits/payment-method") opts)
        (sign-request client)
