@@ -271,6 +271,12 @@ Opts must contain either :order_id or :product_id.
        send-request))
 
 (defn withdraw-to-payment-method
+  "[API docs](https://docs.pro.coinbase.com/#payment-method48)
+```clojure
+(withdraw-to-payment-method client {:amount 10
+                                    :currency \"BTC-USD\"
+                                    :payment_method_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})  
+```" 
   [client opts]
   (->> (build-post-request 
           (str (:url client) "/withdrawals/payment-method")
@@ -279,12 +285,19 @@ Opts must contain either :order_id or :product_id.
        send-request))
 
 (defn get-coinbase-accounts
+  "[API docs](https://docs.pro.coinbase.com/#list-accounts54)"
   [client]
   (->> (build-get-request (str (:url client) "/coinbase-accounts"))
        (sign-request client)
        send-request))
 
 (defn deposit-from-coinbase
+  "[API docs](https://docs.pro.coinbase.com/#coinbase)
+```clojure
+(deposit-from-coinbase client {:amount 2
+                               :currency \"BTC\"
+                               :coinbase_account_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
+```"    
   [client opts]
   (->> (build-post-request 
          (str (:url client) "/deposits/coinbase-account") 
@@ -293,6 +306,12 @@ Opts must contain either :order_id or :product_id.
        send-request))
 
 (defn withdraw-to-coinbase
+  "[API docs](https://docs.pro.coinbase.com/#coinbase49)
+```clojure
+(withdraw-to-coinbase client {:amount 2
+                              :currency \"BTC\"
+                              :coinbase_account_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
+```"
   [client opts]
   (->> (build-post-request 
          (str (:url client) "/withdrawals/coinbase-account")
@@ -301,6 +320,12 @@ Opts must contain either :order_id or :product_id.
        send-request))
 
 (defn withdraw-to-crypto-address
+  "[API docs](https://docs.pro.coinbase.com/#crypto)
+```clojure
+(withdraw-to-crypto-address client {:amount 2
+                                    :currency \"BTC\"
+                                    :crypto_address \"15USXR6S4DhSWVHUxXRCuTkD1SA6qAdy\"})
+```"
   [client opts]
   (->> (build-post-request
          (str (:url client) "/withdrawals/crypto")
@@ -309,18 +334,30 @@ Opts must contain either :order_id or :product_id.
        send-request))
 
 (defn generate-report
+  "[API docs](https://docs.pro.coinbase.com/#create-a-new-report)
+```clojure
+(generate-report client {:type \"fills\"
+                         :start_date \"2018-6-1\"
+                         :end_date \"2018-6-30\"
+                         :product_id \"BTC-USD\"})
+```"      
   [client opts]
   (->> (build-post-request (str (:url client) "/reports") opts)
        (sign-request client)
        send-request))
 
 (defn get-report-status
+  "[API docs](https://docs.pro.coinbase.com/#get-report-status)
+```clojure
+(get-report-status client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
+```"
   [client report-id]
   (->> (build-get-request (str (:url client) "/reports/" report-id))
        (sign-request client)
        send-request))
 
 (defn get-trailing-volume
+  "[API docs](https://docs.pro.coinbase.com/#trailing-volume)"
   [client]
   (->> (build-get-request (str (:url client) "/users/self/trailing-volume"))
        (sign-request client)
