@@ -382,26 +382,41 @@ Opts must contain either :order_id or :product_id.
     :product_ids product_ids 
     :channels channels}))
 
-;; - `opts` will take the following shape
-;; {:product_ids
-;;  :channels (optional)
-;;  :key (optional)
-;;  :secret (optional)
-;;  :passphrase (optional)}
 (defn subscribe
+  "[API docs](https://docs.pro.coinbase.com/#subscribe)
+`connection` is created with [[create-websocket-connection]].
+`opts` takes the following shape:
+```clojure
+{:product_ids
+ :channels (optional)
+ :key (optional)
+ :secret (optional)
+ :passphrase (optional)}
+```
+`key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
+`channels` is a vector of channel names (strings). If no channels are passed, the \"heartbeat\" channel is subscribed to.
+```clojure
+(subscribe connection {:product_ids [\"BTC-USD\"]})
+```"
   [connection opts]
   (->> (get-subscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
-
 (defn unsubscribe
+  "[API docs](https://docs.pro.coinbase.com/#subscribe)
+`connection` is created with [[create-websocket-connection]].
+`opts` takes the equivalent shape as [[subscribe]].
+```clojure
+(unsubscribe connection {:product_ids [\"BTC-USD\"]})
+```"
   [connection opts]
   (->> (get-unsubscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
 (defn close
+  "`connection` is created with [[create-websocket-connection]]."
   [connection]
   (ws/close connection))
 
@@ -417,32 +432,33 @@ Opts must contain either :order_id or :product_id.
       :on-receive (or (:on-receive opts) (constantly nil))
       :on-close (or (:on-close opts) (constantly nil))
       :on-error (or (:on-error opts) (constantly nil)))))
-      
-;; - `opts` will take the following shape
-;; {:url
-;;  :product_ids
-;;  :channels (optional)
-;;  :key (optional)
-;;  :secret (optional)
-;;  :passphrase (optional)
-;;  :on-connect (optional)
-;;  :on-receive (optional)
-;;  :on-close (optional)
-;;  :on-error (optional)
 
 (defn create-websocket-connection
+  "[API docs](https://docs.pro.coinbase.com/#websocket-feed)
+`opts` takes the following shape:
+```clojure
+{:url
+ :product_ids
+ :channels (optional)
+ :key (optional)
+ :secret (optional)
+ :passphrase (optional)
+ :on-connect (optional)
+ :on-receive (optional)
+ :on-close (optional)
+ :on-error (optional)}
+```
+`key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
+`channels `is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
+`on-connect`, `on-receive`, `on-close`, and `on-error` are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the [gniazdo readme](https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options) for details on the callback functions.
+```clojure
+(def conn (create-websocket-connection {:product_ids [\"BTC-USD\"]
+                                        :url \"wss://ws-feed.pro.coinbase.com\"
+                                        :on-receive (fn [x] (prn 'received x))}))
+```"
   [opts]
   (let [connection (get-socket-connection opts)]
     ;; subscribe immediately so the connection isn't lost
     (subscribe connection opts)
     connection))
-
-;; example code
-(def websocket-opts {:product_ids ["BTC-USD"]
-                     :url websocket-url
-                     :on-receive (fn [x] (prn 'received x))})
-(comment
-  (def conn (create-websocket-connection websocket-opts))
-  
-  (close conn))
 
