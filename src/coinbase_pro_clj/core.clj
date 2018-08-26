@@ -1,5 +1,5 @@
 (ns coinbase-pro-clj.core
-  "Public and private endpoint functions and websocket feed functionality. In all function signatures, client takes the following shape:
+  "Public and private endpoint functions and websocket feed functionality. In all function signatures, `client` takes the following shape:
 ```clojure
 {:url
  :key (optional)
@@ -397,8 +397,8 @@ Opts must contain either :order_id or :product_id.
  :secret (optional)
  :passphrase (optional)}
 ```
-`key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
-`channels` is a vector of channel names (strings). If no channels are passed, the \"heartbeat\" channel is subscribed to.
+- `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
+- `channels` is a vector of channel names (strings). If no channels are passed, the \"heartbeat\" channel is subscribed to.
 ```clojure
 (subscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
@@ -409,8 +409,8 @@ Opts must contain either :order_id or :product_id.
 
 (defn unsubscribe
   "[API docs](https://docs.pro.coinbase.com/#subscribe)
-`connection` is created with [[create-websocket-connection]].
-`opts` takes the equivalent shape as [[subscribe]].
+- `connection` is created with [[create-websocket-connection]].
+- `opts` takes the equivalent shape as [[subscribe]].
 ```clojure
 (unsubscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
@@ -439,7 +439,7 @@ Opts must contain either :order_id or :product_id.
 
 (defn create-websocket-connection
   "[API docs](https://docs.pro.coinbase.com/#websocket-feed)
-`opts` takes the following shape:
+- `opts` takes the following shape:
 ```clojure
 {:url
  :product_ids
