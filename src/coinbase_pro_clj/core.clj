@@ -14,22 +14,17 @@ to store these values locally outside of your code.**"
     [coinbase-pro-clj.authentication :refer :all]
     [cheshire.core :refer :all]
     [clj-http.client :as http]
-    [environ.core :refer [env]]
     [gniazdo.core :as ws])
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;; ## Convenience/config values
-(def ^:private rest-url "https://api.pro.coinbase.com")
-(def ^:private websocket-url "wss://ws-feed.pro.coinbase.com")
-(def ^:private sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
-(def ^:private sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
-(def ^:private default-channels ["heartbeat"])
+(def rest-url "https://api.pro.coinbase.com")
+(def websocket-url "wss://ws-feed.pro.coinbase.com")
+(def sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
+(def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
 
-(def ^:private test-client {:url sandbox-rest-url
-                            :key (env :sandbox-key)
-                            :secret (env :sandbox-secret)
-                            :passphrase (env :sandbox-passphrase)})
+(def ^:private default-channels ["heartbeat"])
 
 (defn- send-request
   [request]
