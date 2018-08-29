@@ -40,7 +40,7 @@ Each function takes in a client, which requires a `:url` and optional authentica
              :passphrase "Coinbase Pro passphrase"})
 ```
 
-From here you can call any of the functions (provided your client has a valid key, secret, and passphrase for authenticated endpoints. Here are a few examples:
+From here you can call any of the functions (provided your client has a valid key, secret, and passphrase for authenticated endpoints). Here are a few examples:
 
 ```clojure
 ;; Public endpoints
