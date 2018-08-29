@@ -19,18 +19,29 @@ to store these values locally outside of your code.**"
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;; ## Convenience/config values
-(def rest-url "https://api.pro.coinbase.com")
-(def websocket-url "wss://ws-feed.pro.coinbase.com")
-(def sandbox-rest-url "https://api-public.sandbox.pro.coinbase.com")
-(def sandbox-websocket-url "wss://ws-feed-public.sandbox.pro.coinbase.com")
+(def rest-url 
+  "The rest URL for Coinbase Pro."
+  "https://api.pro.coinbase.com")
+(def websocket-url 
+  "The websocket URL for Coinbase Pro."
+  "wss://ws-feed.pro.coinbase.com")
+(def sandbox-rest-url 
+  "The sandbox rest URL for Coinbase Pro."
+  "https://api-public.sandbox.pro.coinbase.com")
+(def sandbox-websocket-url
+  "The sandbox websocket URL for Coinbase Pro."
+  "wss://ws-feed-public.sandbox.pro.coinbase.com")
 
-(def ^:private default-channels ["heartbeat"])
+(def ^:private default-channels 
+  "Default channels for websocket subscriptions, used if none is explicitly stated."
+  ["heartbeat"])
 
 (defn- send-request
+  "Takes in a request, sends the http request, and returns the body of the response."
   [request]
   (-> request
       http/request
-      :body))    
+      :body))
 
 ;; ## Public endpoints
 
