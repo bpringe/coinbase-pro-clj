@@ -37,7 +37,7 @@ From here you can call any of the functions (provided your client has a valid ke
 ;; public endpoints
 (cp/get-products client)
 
-(cp/get-ticker "BTC-USD")
+(cp/get-ticker client "BTC-USD")
 
 ;; private endpoints (require authentication values in client)
 (cp/get-orders client)
