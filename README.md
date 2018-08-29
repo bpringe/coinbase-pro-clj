@@ -34,7 +34,7 @@ Or in your application:
 Each function takes in a client, which requires a `:url` and optional authentication values. The authentication values are only required for authenticated endpoints. These can be obtained by logging into [Coinbase Pro](https://pro.coinbase.com) and creating them in the API settings section. URL vars are provided by the library for convenience.
 
 ```clojure
-(def client {:url cp/rest-url ; other values include websocket-url, sandbox-rest-url, and sanbox-websocket-url
+(def client {:url cp/rest-url ; Other values include websocket-url, sandbox-rest-url, and sanbox-websocket-url.
              :key "Coinbase Pro key"
              :secret "Coinbase Pro secret"
              :passphrase "Coinbase Pro passphrase"})
@@ -43,12 +43,12 @@ Each function takes in a client, which requires a `:url` and optional authentica
 From here you can call any of the functions (provided your client has a valid key, secret, and passphrase for authenticated endpoints. Here are a few examples:
 
 ```clojure
-;; public endpoints
+;; Public endpoints
 (cp/get-products client)
 
 (cp/get-ticker client "BTC-USD")
 
-;; private endpoints (require authentication values in client)
+;; Private endpoints (require authentication values in client)
 (cp/get-orders client)
 
 (cp/place-order client {:side "buy"
