@@ -53,4 +53,4 @@ See the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) f
 
 Copyright © 2018 Brandon Ringe
 
-Distributed under the MIT License - see the [LICENSE.md](license.md) file for details.
+Distributed under the MIT License
