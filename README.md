@@ -49,6 +49,11 @@ From here you can call any of the functions (provided your client has a valid ke
 ```
 See the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) for a list of all endpoint functions with links the the Coinbase Pro API docs and code examples for each.
 
+
+## Contributing
+
+If you notice anything that is unclear or incorrect in this readme or the docs, feel free to create a pull request, or you can open an issue for me to correct it. If you would like a feature added or notice a bug, please open an issue. Thanks for contributing. =)
+
 ## License
 
 Copyright © 2018 Brandon Ringe
