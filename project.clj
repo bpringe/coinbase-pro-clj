@@ -1,4 +1,4 @@
-(defproject coinbase-pro-clj "0.1.1-SNAPSHOT"
+(defproject coinbase-pro-clj "0.2.0-SNAPSHOT"
   :description "A Clojure wrapper for the Coinbase Pro API (formerly GDAX)."
   :url "https://github.com/bpringe/coinbase-pro-clj"
   :license {:name "MIT"
@@ -14,4 +14,5 @@
   :codox {:namespaces [coinbase-pro-clj.core]
           :metadata {:doc "FIXME: write docs"
                      :doc/format :markdown}
-          :output-path "docs"})
+          :output-path "docs"}
+  :set-version {:updates [{:path "README.md"}]})
