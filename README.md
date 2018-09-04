@@ -63,6 +63,10 @@ See the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) f
 
 If you notice anything that is unclear or incorrect in this readme or the docs, feel free to create a pull request, or you can open an issue for me to correct it. If you would like a feature added or notice a bug, please open an issue. Thanks for contributing. =)
 
+## Contact
+
+If you have any questions or want to discuss the library, you can mention me (@bringe) in the #crypto-currencies channel of the Clojurians Slack.
+
 ## License
 
 Copyright © 2018 Brandon Ringe
