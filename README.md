@@ -65,7 +65,7 @@ If you notice anything that is unclear or incorrect in this readme or the docs, 
 
 ## Contact
 
-If you have any questions or want to discuss the library, you can mention me (@bringe) in the #crypto-currencies channel of the Clojurians Slack.
+If you have any questions or want to discuss the library, you can chat me up (@bringe) in the #crypto-currencies channel of the Clojurians Slack.
 
 ## License
 
