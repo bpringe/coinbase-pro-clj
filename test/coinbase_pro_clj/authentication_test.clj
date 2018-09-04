@@ -67,5 +67,5 @@
 
 ;; Write tests for sign-message if decide to keep implementation tests
 ;; Currently switching to only test surface level api, which inherently tests implementation
-;; This leaves makes changing implementation much easier while still making sure no
+;; This makes changing implementation much easier while still making sure no
 ;; breaking changes occur
