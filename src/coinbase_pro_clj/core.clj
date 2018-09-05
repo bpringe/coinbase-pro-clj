@@ -2,9 +2,9 @@
   "Public and private endpoint functions and websocket feed functionality. In all function signatures, `client` takes the following shape:
 ```clojure
 {:url
- :key (optional)
- :secret (optional)
- :passphrase (optional)}
+ :key ; optional
+ :secret ; optional
+ :passphrase ; optional}
 ```
 - `key`, `secret`, and `passphrase` are only required if the request is authenticated. These values can be created in the [API settings](https://pro.coinbase.com/profile/api) of your Coinbase Pro account.
 **Remember not to store these values in an online repository as this will give others access to your account. You could use something like [environ](https://github.com/weavejester/environ)
@@ -245,10 +245,12 @@ to store these values locally outside of your code.**"
 ;; opts must contain either order_id or product_id
 (defn get-fills
   "[API docs](https://docs.pro.coinbase.com/#list-fills)
-Opts must contain either :order_id or :product_id.
+     
+Opts must contain either `:order_id` or `:product_id`.
+   
 ```clojure
 (get-fills client {:product_id \"BTC-USD\" :before 2})
-```"   
+```"
   ([client opts]
    (->> (build-get-request (str (:url client) "/fills"))
         (append-query-params opts)
@@ -388,17 +390,19 @@ Opts must contain either :order_id or :product_id.
 
 (defn subscribe
   "[API docs](https://docs.pro.coinbase.com/#subscribe)
-`connection` is created with [[create-websocket-connection]].
-`opts` takes the following shape:
+     
+- `connection` is created with [[create-websocket-connection]].
+- `opts` takes the following shape:
 ```clojure
 {:product_ids
- :channels (optional)
- :key (optional)
- :secret (optional)
- :passphrase (optional)}
+ :channels ; optional
+ :key ; optional
+ :secret ; optional
+ :passphrase ; optional}
 ```
 - `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
 - `channels` is a vector of channel names (strings). If no channels are passed, the \"heartbeat\" channel is subscribed to.
+  
 ```clojure
 (subscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
@@ -409,8 +413,10 @@ Opts must contain either :order_id or :product_id.
 
 (defn unsubscribe
   "[API docs](https://docs.pro.coinbase.com/#subscribe)
+
 - `connection` is created with [[create-websocket-connection]].
 - `opts` takes the equivalent shape as [[subscribe]].
+
 ```clojure
 (unsubscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
@@ -444,14 +450,14 @@ Opts must contain either :order_id or :product_id.
 ```clojure
 {:url
  :product_ids
- :channels (optional)
- :key (optional)
- :secret (optional)
- :passphrase (optional)
- :on-connect (optional)
- :on-receive (optional)
- :on-close (optional)
- :on-error (optional)}
+ :channels ; optional
+ :key ; optional
+ :secret ; optional
+ :passphrase ; optional
+ :on-connect ; optional
+ :on-receive ; optional
+ :on-close ; optional
+ :on-error ; optional}
 ```
 - `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
 - `channels` is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
