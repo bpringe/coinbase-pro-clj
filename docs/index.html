@@ -4,7 +4,7 @@
 <pre><code class="clojure">{:url
  :key ; optional
  :secret ; optional
- :passphrase ; optional}
+ :passphrase} ; optional
 </code></pre>
 <ul>
   <li><code>key</code>, <code>secret</code>, and <code>passphrase</code> are only required if the request is authenticated. These values can be created in the <a href="https://pro.coinbase.com/profile/api">API settings</a> of your Coinbase Pro account. <strong>Remember not to store these values in an online repository as this will give others access to your account. You could use something like <a href="https://github.com/weavejester/environ">environ</a> to store these values locally outside of your code.</strong></li>

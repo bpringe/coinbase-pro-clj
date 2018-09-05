@@ -4,7 +4,7 @@
 <pre><code class="clojure">{:url
  :key ; optional
  :secret ; optional
- :passphrase ; optional}
+ :passphrase} ; optional
 </code></pre>
 <ul>
   <li><code>key</code>, <code>secret</code>, and <code>passphrase</code> are only required if the request is authenticated. These values can be created in the <a href="https://pro.coinbase.com/profile/api">API settings</a> of your Coinbase Pro account. <strong>Remember not to store these values in an online repository as this will give others access to your account. You could use something like <a href="https://github.com/weavejester/environ">environ</a> to store these values locally outside of your code.</strong></li>
@@ -25,7 +25,7 @@
  :on-connect ; optional
  :on-receive ; optional
  :on-close ; optional
- :on-error ; optional}
+ :on-error} ; optional
 </code></pre></li>
   <li><code>key</code>, <code>secret</code>, and <code>passphrase</code> are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.</li>
   <li><code>channels</code> is a vector of channel names (strings) . If no channels are passed, the “heartbeat” channel is subscribed to.</li>
@@ -94,7 +94,7 @@
  :channels ; optional
  :key ; optional
  :secret ; optional
- :passphrase ; optional}
+ :passphrase} ; optional
 </code></pre></li>
   <li><code>key</code>, <code>secret</code>, and <code>passphrase</code> are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.</li>
   <li><code>channels</code> is a vector of channel names (strings). If no channels are passed, the “heartbeat” channel is subscribed to.</li>
