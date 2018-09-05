@@ -1,14 +1,14 @@
-# coinbase-pro-clj
-
 [![Build Status](https://travis-ci.org/bpringe/coinbase-pro-clj.svg?branch=master)](https://travis-ci.org/bpringe/coinbase-pro-clj)
 [![Clojars Project](https://img.shields.io/clojars/v/coinbase-pro-clj.svg)](https://clojars.org/coinbase-pro-clj)
+
+# coinbase-pro-clj
 
 A Clojure wrapper for the [Coinbase Pro API](https://docs.pro.coinbase.com/) (formerly GDAX). The point of this library is to make it convenient to harness the power of Clojure
 for creating cryptocurrency trading bots and similar applications that utilize the [Coinbase Pro exchange](https://pro.coinbase.com). Results are given in edn, and authentication is handled by the library.
 
 ## Installation
 
-Add the dependency to your project or build file. Then run `lein deps`.
+Add the dependency to your project or build file.
 
 ```clojure
 [coinbase-pro-clj "0.2.0"]
