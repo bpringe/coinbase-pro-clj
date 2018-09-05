@@ -8,7 +8,7 @@ for creating cryptocurrency trading bots and similar applications that utilize t
 
 ## Installation
 
-Add the dependency to your project or build file. Then run `lein deps`.
+Add the dependency to your project or build file.
 
 ```clojure
 [coinbase-pro-clj "0.2.0"]
