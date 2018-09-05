@@ -14,9 +14,9 @@
 <pre><code class="clojure">(cancel-order client "7d0f7d8e-dd34-4d9c-a846-06f431c381ba")
 </code></pre></div></div></div><div class="public anchor" id="var-close"><h3>close</h3><div class="usage"><code>(close connection)</code></div><div class="doc"><div class="markdown"><p><code>connection</code> is created with <a href="coinbase-pro-clj.core.html#var-create-websocket-connection">create-websocket-connection</a>.</p></div></div></div><div class="public anchor" id="var-create-websocket-connection"><h3>create-websocket-connection</h3><div class="usage"><code>(create-websocket-connection opts)</code></div><div class="doc"><div class="markdown"><p><a href="https://docs.pro.coinbase.com/#websocket-feed">API docs</a></p>
 <ul>
-  <li><code>opts</code> takes the following shape:</li>
-</ul>
-<pre><code class="clojure">{:url
+  <li>
+  <p><code>opts</code> takes the following shape:</p>
+  <pre><code class="clojure">{:url
  :product_ids
  :channels (optional)
  :key (optional)
@@ -26,8 +26,7 @@
  :on-receive (optional)
  :on-close (optional)
  :on-error (optional)}
-</code></pre>
-<ul>
+</code></pre></li>
   <li><code>key</code>, <code>secret</code>, and <code>passphrase</code> are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.</li>
   <li><code>channels</code> is a vector of channel names (strings) . If no channels are passed, the “heartbeat” channel is subscribed to.</li>
   <li><code>on-connect</code>, <code>on-receive</code>, <code>on-close</code>, and <code>on-error</code> are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the <a href="https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options">gniazdo readme</a> for details on the callback functions.</li>

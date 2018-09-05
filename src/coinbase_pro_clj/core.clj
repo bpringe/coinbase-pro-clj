@@ -441,7 +441,6 @@ Opts must contain either :order_id or :product_id.
   "[API docs](https://docs.pro.coinbase.com/#websocket-feed)
      
 - `opts` takes the following shape:
-   
 ```clojure
 {:url
  :product_ids
@@ -454,7 +453,6 @@ Opts must contain either :order_id or :product_id.
  :on-close (optional)
  :on-error (optional)}
 ```
-   
 - `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
 - `channels` is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
 - `on-connect`, `on-receive`, `on-close`, and `on-error` are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the [gniazdo readme](https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options) for details on the callback functions.
