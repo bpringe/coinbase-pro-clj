@@ -105,8 +105,8 @@ to store these values locally outside of your code.**"
 ```clojure
 (get-historic-rates client \"BTC-USD\")
 (get-historic-rates client \"BTC-USD\" {:start \"2018-06-01\"
-                                        :end \"2018-06-30\"
-                                        :granularity 86400})
+                                      :end \"2018-06-30\"
+                                      :granularity 86400})
 ```"
   ([client product-id]
    (get-historic-rates client product-id {}))
