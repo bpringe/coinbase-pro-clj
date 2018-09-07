@@ -220,7 +220,7 @@
            (core/subscribe 1 {:product_ids ["BTC-USD"] :channels ["fake channel"] :key "key" :secret "secret" :passphrase "passphrase"})))))
 
 (deftest unsubscribe-test
-  (is (= {:connection 1, :message "{\"type\":\"unsubscribe\",\"product_ids\":{\"product_ids\":[\"BTC-USD\"],\"channels\":[\"fake channel\"]},\"channels\":[]}"}
+  (is (= {:connection 1, :message "{\"product_ids\":[\"BTC-USD\"],\"channels\":[\"fake channel\"],\"type\":\"unsubscribe\"}"}
          (core/unsubscribe 1 {:product_ids ["BTC-USD"] :channels ["fake channel"]}))))
 
 (deftest close-test

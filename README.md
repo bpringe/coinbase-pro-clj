@@ -11,12 +11,12 @@ for creating cryptocurrency trading bots and similar applications that utilize t
 Add the dependency to your project or build file.
 
 ```clojure
-[coinbase-pro-clj "0.2.0"]
+[coinbase-pro-clj "0.3.0"]
 ```
 
 ## Quick Start
 
-Read on for a quick start or jump to the detailed [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html).
+Read on for a quick start or jump to the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) for a list of all endpoint and websocket functions with links the the Coinbase Pro API docs and code examples for each.
 
 First, require it in the REPL:
 
@@ -57,7 +57,27 @@ From here you can call any of the functions (provided your client has a valid ke
                         :size 1})
 ```
 
-See the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) for a list of all endpoint functions with links the the Coinbase Pro API docs and code examples for each.
+### Websocket Feed
+
+Websocket messages are passed as edn to your `on-receive` function. When a new connection is created, the heartbeat channel is subscribed to if no `:channel` is specified.
+
+```clojure
+;; Create a new connection and subscribe to the ticker channel for BTC-USD
+(def conn (cp/create-websocket-connection {:product_ids ["BTC-USD" "ETH-USD"]
+                                           :channels [{:name "ticker"}]
+                                           :url cp/websocket-url
+                                           :on-receive (fn [x] (prn 'received x))}))
+
+;; Unsubscribe from the ticker channel for all products
+(cp/unsubscribe conn {:channels [{:name "ticker"}]})
+
+;; Subscribe to the heartbeat channel of BTC-USD
+(cp/subscribe conn {:channels [{:name "heartbeat"
+                                :product_ids ["BTC-USD"]}]})
+
+;; Close the connection
+(cp/close conn)
+```
 
 ## Contributing
 
