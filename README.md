@@ -11,7 +11,7 @@ for creating cryptocurrency trading bots and similar applications that utilize t
 Add the dependency to your project or build file.
 
 ```clojure
-[coinbase-pro-clj "0.3.0"]
+[coinbase-pro-clj "1.0.0"]
 ```
 
 ## Quick Start
