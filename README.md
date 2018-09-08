@@ -59,7 +59,12 @@ From here you can call any of the functions (provided your client has a valid ke
 
 ### Websocket Feed
 
-Websocket messages are passed as edn to your `on-receive` function. When a new connection is created, the heartbeat channel is subscribed to if no `:channel` is specified.
+When a new connection is created, the heartbeat channel is subscribed to if no `:channel` is specified. The following list describes the callback functions that can be passed to `create-websocket-connection`:
+
+- `:on-receive` - A unary function called when a message is received. The argument is received as edn.
+- `:on-connect` - A unary function called after the connection has been established. The argument is a [WebSocketSession](https://www.eclipse.org/jetty/javadoc/9.4.8.v20171121/org/eclipse/jetty/websocket/common/WebSocketSession.html).
+- `:on-error` - A unary function called in case of errors. The argument is a `Throwable` describing the error.
+- `:on-close` - A binary function called when the connection is closed. Arguments are an `int` status code and a `String` description of reason.
 
 ```clojure
 ;; Create a new connection and subscribe to the ticker channel for BTC-USD
