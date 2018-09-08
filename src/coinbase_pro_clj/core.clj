@@ -371,7 +371,8 @@ Opts must contain either `:order_id` or `:product_id`.
 
 ;; ## Websocket feed
 
-(defn- get-subscribe-message
+(defn- create-subscribe-message
+  "Creates the subscribe message and signs the message if key, secret, and passphrase are provided."
   [opts]
   (let [message {:type "subscribe" 
                  :product_ids (:product_ids opts) 
@@ -380,13 +381,10 @@ Opts must contain either `:order_id` or `:product_id`.
       (sign-message message opts)
       message)))
 
-(defn- get-unsubscribe-message
-  ([product_ids]
-   (get-unsubscribe-message product_ids []))
-  ([product_ids channels]
-   {:type "unsubscribe" 
-    :product_ids product_ids 
-    :channels channels}))
+(defn- create-unsubscribe-message
+  "Creates the unsubscribe message."
+  [opts]
+  (merge opts {:type "unsubscribe"}))
 
 (defn subscribe
   "[API docs](https://docs.pro.coinbase.com/#subscribe)
@@ -407,7 +405,7 @@ Opts must contain either `:order_id` or `:product_id`.
 (subscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
   [connection opts]
-  (->> (get-subscribe-message opts)
+  (->> (create-subscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
@@ -421,7 +419,7 @@ Opts must contain either `:order_id` or `:product_id`.
 (unsubscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
   [connection opts]
-  (->> (get-unsubscribe-message opts)
+  (->> (create-unsubscribe-message opts)
        edn->json
        (ws/send-msg connection)))
 
@@ -430,7 +428,20 @@ Opts must contain either `:order_id` or `:product_id`.
   [connection]
   (ws/close connection))
 
+(defn- create-on-receive
+  "Returns a function that returns nil if user-on-receive is nil, otherwise returns a function 
+  that takes the received message, converts it to edn, then passes it to the user-on-receive function"
+  [user-on-receive]
+  (if (nil? user-on-receive)
+    (constantly nil)
+    (fn [msg]
+      (-> msg
+          json->edn ; convert to edn before passing to user defined on-receive
+          user-on-receive))))
+        
 (defn- get-socket-connection
+  "Creates the socket client using the Java WebSocketClient and SslContextFactory, starts the client,
+  then connects it to the websocket URL."
   [opts]
   (let [client (WebSocketClient. (SslContextFactory.))]
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
@@ -439,7 +450,7 @@ Opts must contain either `:order_id` or `:product_id`.
       (:url opts)
       :client client
       :on-connect (or (:on-connect opts) (constantly nil))
-      :on-receive (or (:on-receive opts) (constantly nil))
+      :on-receive (create-on-receive (:on-receive opts))
       :on-close (or (:on-close opts) (constantly nil))
       :on-error (or (:on-error opts) (constantly nil)))))
 

@@ -1,4 +1,4 @@
-(defproject coinbase-pro-clj "0.2.0"
+(defproject coinbase-pro-clj "1.0.0"
   :description "A Clojure wrapper for the Coinbase Pro API (formerly GDAX)."
   :url "https://github.com/bpringe/coinbase-pro-clj"
   :license {:name "MIT"
