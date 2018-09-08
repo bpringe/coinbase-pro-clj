@@ -457,22 +457,17 @@ Opts must contain either `:order_id` or `:product_id`.
 (defn create-websocket-connection
   "[API docs](https://docs.pro.coinbase.com/#websocket-feed)
      
-- `opts` takes the following shape:
-```clojure
-{:url
- :product_ids
- :channels ; optional
- :key ; optional
- :secret ; optional
- :passphrase ; optional
- :on-connect ; optional
- :on-receive ; optional
- :on-close ; optional
- :on-error} ; optional
-```
-- `key`, `secret`, and `passphrase` are only required if you want an authenticated feed. See the Coinbase Pro API docs for details on authenticated feeds.
-- `channels` is a vector of channel names (strings) . If no channels are passed, the \"heartbeat\" channel is subscribed to.
-- `on-connect`, `on-receive`, `on-close`, and `on-error` are callback functions. Coinbase-pro-clj uses gniazdo for its websocket client. See the [gniazdo readme](https://github.com/stalefruits/gniazdo#gniazdocoreconnect-uri--options) for details on the callback functions.
+- `opts` is a map that takes the following keys:
+    - `:url` - the websocket URL
+    - `:product_ids` - the product IDs - a vector of strings 
+    - `:channels` - optional - channels to subscribe to - a vector of strings. If no channels are passed, the \"heartbeat \" channel is subscribed to.
+    - `:key` - optional - your Coinbase Pro API key 
+    - `:secret` - optional - your Coinbase Pro API secret
+    - `:passphrase` - optional - your Coinbase Pro API passphrase
+    - `:on-receive` - optional - A unary function called when a message is received. The argument is received as edn.
+    - `:on-connect` - optional - A unary function called after the connection has been established. The argument is a [WebSocketSession](https://www.eclipse.org/jetty/javadoc/9.4.8.v20171121/org/eclipse/jetty/websocket/common/WebSocketSession.html).
+    - `:on-error` - optional - A unary function called in case of errors. The argument is a `Throwable` describing the error.
+    - `:on-close` - optional - A binary function called when the connection is closed. Arguments are an `int` status code and a `String` description of reason.    
 
 ```clojure
 (def conn (create-websocket-connection {:product_ids [\"BTC-USD\"]
