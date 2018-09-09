@@ -1,4 +1,6 @@
 language: clojure
+script: lein do test, codox
 branches:
   only:
     - master
+

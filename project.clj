@@ -11,8 +11,12 @@
                  [stylefruits/gniazdo "1.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [ring/ring-codec "1.1.1"]]
+  :plugins [[lein-codox "0.10.4"]]
   :codox {:namespaces [coinbase-pro-clj.core]
           :metadata {:doc "FIXME: write docs"
                      :doc/format :markdown}
           :output-path "docs"}
-  :set-version {:updates [{:path "README.md"}]})
+  :set-version {:updates [{:path "README.md"}]}
+  :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
+                                    :username :env/CLOJARS_USERNAME
+                                    :password :env/CLOJARS_PASSWORD}]])
