@@ -16,6 +16,6 @@
                      :doc/format :markdown}
           :output-path "docs"}
   :set-version {:updates [{:path "README.md"}]}
-  :repositories [["releases" {:url "https://clojars.com/repo"
-                              :username :env/clojars_username
-                              :password :env/clojars_password}]])
+  :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
+                                    :username :env/CLOJARS_USERNAME
+                                    :password :env/CLOJARS_PASSWORD}]])
