@@ -15,4 +15,7 @@
           :metadata {:doc "FIXME: write docs"
                      :doc/format :markdown}
           :output-path "docs"}
-  :set-version {:updates [{:path "README.md"}]})
+  :set-version {:updates [{:path "README.md"}]}
+  :repositories [["releases" {:url "https://clojars.com/repo"
+                              :username :env/clojars_username
+                              :password :env/clojars_password}]])
