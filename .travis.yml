@@ -1,7 +1,5 @@
 language: clojure
 script: lein do test, codox
-jdk:
-  - oraclejdk8
 branches:
   only:
     - master
