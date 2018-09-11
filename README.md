@@ -31,7 +31,7 @@ Or in your application:
   (:require [coinbase-pro-clj.core :as cp]))
 ```
 
-### REST Endpoints
+### Endpoints
 
 Each function takes in a client, which requires a `:url` and optional authentication values. The authentication values are only required for authenticated endpoints. These can be obtained by logging into [Coinbase Pro](https://pro.coinbase.com) and creating them in the API settings section. URL vars are provided by the library for convenience.
 
