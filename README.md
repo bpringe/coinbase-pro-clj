@@ -10,9 +10,7 @@ for creating cryptocurrency trading bots and similar applications that utilize t
 
 Add the dependency to your project or build file.
 
-```clojure
-[coinbase-pro-clj "1.0.0"]
-```
+[![Clojars Project](https://img.shields.io/clojars/v/coinbase-pro-clj.svg)](https://clojars.org/coinbase-pro-clj)
 
 ## Quick Start
 
