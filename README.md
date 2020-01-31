@@ -11,7 +11,7 @@ Add the dependency to your project or build file.
 
 ## Quick Start
 
-Read on for a quick start or jump to the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) for a list of all endpoint and websocket functions with links the the Coinbase Pro API docs and code examples for each.
+Read on for a quick start or jump to the [documentation](https://bpringe.github.io/coinbase-pro-clj/index.html) for a list of all endpoint and websocket functions with links to the Coinbase Pro API docs and code examples for each.
 
 First, require it in the REPL:
 
