@@ -81,6 +81,10 @@ When a new connection is created, the heartbeat channel is subscribed to if no `
 (cp/close conn)
 ```
 
+## Find This Library Useful?
+
+You can [donate to me](https://paypal.me/BrandonRinge?locale.x=en_US). Even just the price of a coffee would be very appreciated. :heart:
+
 ## Contributing
 
 If you notice anything that is unclear or incorrect in this readme or the docs, feel free to create a pull request, or you can open an issue for me to correct it. If you would like a feature added or notice a bug, please open an issue. Thanks for contributing. =)
