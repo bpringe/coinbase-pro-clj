@@ -8,12 +8,20 @@
 `key`, `secret`, and `passphrase` are only required if the request is authenticated. These values can be created in the [API settings](https://pro.coinbase.com/profile/api) of your Coinbase Pro account.
 **Remember not to store these values in an online repository as this will give others access to your account. You could use something like [environ](https://github.com/weavejester/environ)
 to store these values locally outside of your code.**"
-  (:require 
-    [coinbase-pro-clj.utilities :refer :all]
-    [coinbase-pro-clj.authentication :refer :all]
-    [cheshire.core :refer :all]
-    [clj-http.client :as http]
-    [gniazdo.core :as ws])
+  (:require
+   [coinbase-pro-clj.utilities
+    :refer [append-query-params
+            build-get-request
+            build-post-request
+            build-delete-request
+            json->edn
+            edn->json
+            contains-many?]]
+   [coinbase-pro-clj.authentication :refer [sign-request
+                                            sign-message]]
+   [clj-http.client :as http]
+   [gniazdo.core :as ws]
+   [clojure.string :as str])
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
@@ -198,11 +206,11 @@ to store these values locally outside of your code.**"
   ([client]
    (get-orders client {:status ["all"]}))
   ([client opts]
-   (let [query-string (clojure.string/join "&" (map #(str "status=" %) (:status opts)))
+   (let [query-string (str/join "&" (map #(str "status=" %) (:status opts)))
          rest-opts (dissoc opts :status)]
     (->> (build-get-request (str (:url client)
                                  "/orders"
-                                 (when-not (clojure.string/blank? query-string) "?")
+                                 (when-not (str/blank? query-string) "?")
                                  query-string))
          (append-query-params rest-opts)
          (sign-request client)

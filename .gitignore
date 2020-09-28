@@ -12,3 +12,4 @@ pom.xml.asc
 profiles.clj
 .gorilla*
 examples.clj
+.calva/output-window

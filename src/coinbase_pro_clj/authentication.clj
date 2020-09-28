@@ -1,12 +1,13 @@
 (ns coinbase-pro-clj.authentication
   (:require
-    [coinbase-pro-clj.utilities :refer :all]
-    [clojure.data.codec.base64 :as b64]
-    [pandect.algo.sha256 :refer :all]))
+   [coinbase-pro-clj.utilities :refer [get-timestamp parse-request-path]]
+   [clojure.data.codec.base64 :as b64]
+   [pandect.algo.sha256 :refer [sha256-hmac*]]
+   [clojure.string :as str]))
 
 (defn- create-prehash-string
   [timestamp request]
-  (str timestamp (clojure.string/upper-case (:method request)) 
+  (str timestamp (str/upper-case (:method request)) 
     (parse-request-path (:url request)) (:body request)))
                     
 (defn- create-http-signature

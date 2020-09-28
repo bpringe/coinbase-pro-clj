@@ -1,7 +1,8 @@
 (ns coinbase-pro-clj.utilities
   (:require
-    [clojure.data.json :as json]
-    [ring.util.codec :refer [form-encode]]))
+   [clojure.data.json :as json]
+   [ring.util.codec :refer [form-encode]]
+   [clojure.string :as str]))
 
 (defn edn->json
   [edn-content]
@@ -20,7 +21,7 @@
 
 (defn parse-request-path
   [request-url]
-  (second (clojure.string/split request-url #".com")))
+  (second (str/split request-url #".com")))
 
 (defn build-base-request
   [method url]
