@@ -1,4 +1,4 @@
-(ns coinbase-pro-clj.core
+(ns ledgerx-clj.core
   "Public and private endpoint functions and websocket feed functionality. In all function signatures, `client` is a map with the following keys:
 - `:url` - rest URL
 - `:key` - optional - your Coinbase Pro API key
@@ -8,30 +8,30 @@
 `key`, `secret`, and `passphrase` are only required if the request is authenticated. These values can be created in the [API settings](https://pro.coinbase.com/profile/api) of your Coinbase Pro account.
 **Remember not to store these values in an online repository as this will give others access to your account. You could use something like [environ](https://github.com/weavejester/environ)
 to store these values locally outside of your code.**"
-  (:require 
-    [coinbase-pro-clj.utilities :refer :all]
-    [coinbase-pro-clj.authentication :refer :all]
-    [cheshire.core :refer :all]
-    [clj-http.client :as http]
-    [gniazdo.core :as ws])
+  (:require
+   [ledgerx-clj.utilities :refer :all]
+   [ledgerx-clj.authentication :refer :all]
+   [cheshire.core :refer :all]
+   [clj-http.client :as http]
+   [gniazdo.core :as ws])
   (:import (org.eclipse.jetty.websocket.client WebSocketClient)
            (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 ;; ## Convenience/config values
-(def rest-url 
+(def rest-url
   "The rest URL for Coinbase Pro."
   "https://api.pro.coinbase.com")
-(def websocket-url 
+(def websocket-url
   "The websocket URL for Coinbase Pro."
   "wss://ws-feed.pro.coinbase.com")
-(def sandbox-rest-url 
+(def sandbox-rest-url
   "The sandbox rest URL for Coinbase Pro."
   "https://api-public.sandbox.pro.coinbase.com")
 (def sandbox-websocket-url
   "The sandbox websocket URL for Coinbase Pro."
   "wss://ws-feed-public.sandbox.pro.coinbase.com")
 
-(def ^:private default-channels 
+(def ^:private default-channels
   "Default channels for websocket subscriptions, used if none is explicitly stated."
   ["heartbeat"])
 
@@ -56,7 +56,7 @@ to store these values locally outside of your code.**"
   [client]
   (-> (str (:url client) "/products")
       build-get-request
-      send-request))    
+      send-request))
 
 (defn get-order-book
   "[API docs](https://docs.pro.coinbase.com/#get-product-order-book)
@@ -70,7 +70,7 @@ to store these values locally outside of your code.**"
    (-> (str (:url client) "/products/" product-id "/book?level=" level)
        build-get-request
        send-request)))
-  
+
 (defn get-ticker
   "[API docs](https://docs.pro.coinbase.com/#get-product-ticker)
 ```clojure
@@ -98,7 +98,7 @@ to store these values locally outside of your code.**"
         build-get-request
         (append-query-params opts)
         send-request)))
-    
+
 (defn get-historic-rates
   "[API docs](https://docs.pro.coinbase.com/#get-historic-rates)
 ```clojure
@@ -124,7 +124,7 @@ to store these values locally outside of your code.**"
   (->> (str (:url client) "/products/" product-id "/stats")
        build-get-request
        send-request))
-     
+
 (defn get-currencies
   "[API docs](https://docs.pro.coinbase.com/#get-currencies)"
   [client]
@@ -200,19 +200,19 @@ to store these values locally outside of your code.**"
   ([client opts]
    (let [query-string (clojure.string/join "&" (map #(str "status=" %) (:status opts)))
          rest-opts (dissoc opts :status)]
-    (->> (build-get-request (str (:url client)
-                                 "/orders"
-                                 (when-not (clojure.string/blank? query-string) "?")
-                                 query-string))
-         (append-query-params rest-opts)
-         (sign-request client)
-         send-request))))
+     (->> (build-get-request (str (:url client)
+                                  "/orders"
+                                  (when-not (clojure.string/blank? query-string) "?")
+                                  query-string))
+          (append-query-params rest-opts)
+          (sign-request client)
+          send-request))))
 
 (defn cancel-order
   "[API docs](https://docs.pro.coinbase.com/#cancel-an-order)
 ```clojure
 (cancel-order client \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\")
-```"   
+```"
   [client order-id]
   (->> (build-delete-request (str (:url client) "/orders/" order-id))
        (sign-request client)
@@ -222,12 +222,12 @@ to store these values locally outside of your code.**"
   "[API docs](https://docs.pro.coinbase.com/#cancel-all)
 ```clojure
 (cancel-all client \"BTC-USD\")
-```"   
+```"
   ([client]
-   (cancel-all client nil))  
+   (cancel-all client nil))
   ([client product-id]
-   (->> (build-delete-request 
-          (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
+   (->> (build-delete-request
+         (str (:url client) "/orders" (when-not (nil? product-id) (str "?product_id=" product-id))))
         (sign-request client)
         send-request)))
 
@@ -244,9 +244,9 @@ to store these values locally outside of your code.**"
 ;; opts must contain either order_id or product_id
 (defn get-fills
   "[API docs](https://docs.pro.coinbase.com/#list-fills)
-     
+
 Opts must contain either `:order_id` or `:product_id`.
-   
+
 ```clojure
 (get-fills client {:product_id \"BTC-USD\" :before 2})
 ```"
@@ -280,12 +280,12 @@ Opts must contain either `:order_id` or `:product_id`.
 ```clojure
 (withdraw-to-payment-method client {:amount 10
                                     :currency \"BTC-USD\"
-                                    :payment_method_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})  
-```" 
+                                    :payment_method_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
+```"
   [client opts]
-  (->> (build-post-request 
-          (str (:url client) "/withdrawals/payment-method")
-          opts)
+  (->> (build-post-request
+        (str (:url client) "/withdrawals/payment-method")
+        opts)
        (sign-request client)
        send-request))
 
@@ -302,11 +302,11 @@ Opts must contain either `:order_id` or `:product_id`.
 (deposit-from-coinbase client {:amount 2
                                :currency \"BTC\"
                                :coinbase_account_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
-```"    
+```"
   [client opts]
-  (->> (build-post-request 
-         (str (:url client) "/deposits/coinbase-account") 
-         opts)
+  (->> (build-post-request
+        (str (:url client) "/deposits/coinbase-account")
+        opts)
        (sign-request client)
        send-request))
 
@@ -318,9 +318,9 @@ Opts must contain either `:order_id` or `:product_id`.
                               :coinbase_account_id \"7d0f7d8e-dd34-4d9c-a846-06f431c381ba\"})
 ```"
   [client opts]
-  (->> (build-post-request 
-         (str (:url client) "/withdrawals/coinbase-account")
-         opts)
+  (->> (build-post-request
+        (str (:url client) "/withdrawals/coinbase-account")
+        opts)
        (sign-request client)
        send-request))
 
@@ -333,8 +333,8 @@ Opts must contain either `:order_id` or `:product_id`.
 ```"
   [client opts]
   (->> (build-post-request
-         (str (:url client) "/withdrawals/crypto")
-         opts)
+        (str (:url client) "/withdrawals/crypto")
+        opts)
        (sign-request client)
        send-request))
 
@@ -345,7 +345,7 @@ Opts must contain either `:order_id` or `:product_id`.
                          :start_date \"2018-6-1\"
                          :end_date \"2018-6-30\"
                          :product_id \"BTC-USD\"})
-```"      
+```"
   [client opts]
   (->> (build-post-request (str (:url client) "/reports") opts)
        (sign-request client)
@@ -373,8 +373,8 @@ Opts must contain either `:order_id` or `:product_id`.
 (defn- create-subscribe-message
   "Creates the subscribe message and signs the message if key, secret, and passphrase are provided."
   [opts]
-  (let [message {:type "subscribe" 
-                 :product_ids (:product_ids opts) 
+  (let [message {:type "subscribe"
+                 :product_ids (:product_ids opts)
                  :channels (or (:channels opts) default-channels)}]
     (if (contains-many? opts :key :secret :passphrase)
       (sign-message message opts)
@@ -387,7 +387,7 @@ Opts must contain either `:order_id` or `:product_id`.
 
 (defn subscribe
   "[API docs](https://docs.pro.coinbase.com/#subscribe)
-     
+
 - `connection` is created with [[create-websocket-connection]]
 - `opts` is a map with the following keys:
     - `:product_ids` - either this or `:channels` or both must be provided (see the Coinbase Pro API docs) - a vector of strings
@@ -395,7 +395,7 @@ Opts must contain either `:order_id` or `:product_id`.
     - `:key` - optional - your Coinbase Pro API key
     - `:secret` - optional - your Coinbase Pro API key
     - `:passphrase` - optional - your Coinbase Pro API key
-  
+
 ```clojure
 (subscribe connection {:product_ids [\"BTC-USD\"]})
 ```"
@@ -424,7 +424,7 @@ Opts must contain either `:order_id` or `:product_id`.
   (ws/close connection))
 
 (defn- create-on-receive
-  "Returns a function that returns nil if user-on-receive is nil, otherwise returns a function 
+  "Returns a function that returns nil if user-on-receive is nil, otherwise returns a function
   that takes the received message, converts it to edn, then passes it to the user-on-receive function"
   [user-on-receive]
   (if (nil? user-on-receive)
@@ -433,7 +433,7 @@ Opts must contain either `:order_id` or `:product_id`.
       (-> msg
           json->edn ; convert to edn before passing to user defined on-receive
           user-on-receive))))
-        
+
 (defn- get-socket-connection
   "Creates the socket client using the Java WebSocketClient and SslContextFactory, starts the client,
   then connects it to the websocket URL."
@@ -442,12 +442,12 @@ Opts must contain either `:order_id` or `:product_id`.
     (.setMaxTextMessageSize (.getPolicy client) (* 1024 1024))
     (.start client)
     (ws/connect
-      (:url opts)
-      :client client
-      :on-connect (or (:on-connect opts) (constantly nil))
-      :on-receive (create-on-receive (:on-receive opts))
-      :on-close (or (:on-close opts) (constantly nil))
-      :on-error (or (:on-error opts) (constantly nil)))))
+     (:url opts)
+     :client client
+     :on-connect (or (:on-connect opts) (constantly nil))
+     :on-receive (create-on-receive (:on-receive opts))
+     :on-close (or (:on-close opts) (constantly nil))
+     :on-error (or (:on-error opts) (constantly nil)))))
 
 (defn create-websocket-connection
   "[API docs](https://docs.pro.coinbase.com/#websocket-feed)

@@ -1,6 +1,6 @@
-(ns coinbase-pro-clj.utilities-test
+(ns ledgerx-clj.utilities-test
   (:require [clojure.test :refer :all]
-            [coinbase-pro-clj.utilities :refer :all]))
+            [ledgerx-clj.utilities :refer :all]))
 
 (def default-options {:accept :json
                       :as :json})
@@ -59,12 +59,12 @@
         "without options")
     (is (= (merge expected options) (build-delete-request url options))
         "with options")))
-                  
+
 (deftest append-query-params-test
   (let [base-url "https://test"]
-    (is (= {:url (str base-url "?a=1&b=hello")} 
+    (is (= {:url (str base-url "?a=1&b=hello")}
            (append-query-params {:a 1 :b "hello"} {:url base-url}))
-      "without existing query params on url")
+        "without existing query params on url")
     (is (= {:url (str base-url "?answer=42&message=hello")}
            (append-query-params {:message "hello"} {:url (str base-url "?answer=42")}))
         "with existing query params on url")))

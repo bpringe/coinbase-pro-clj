@@ -1,8 +1,8 @@
-(ns coinbase-pro-clj.core-test
-  (:require 
-    [clojure.test :refer :all]
-    [coinbase-pro-clj.core :as core]
-    [gniazdo.core :as ws]))
+(ns ledgerx-clj.core-test
+  (:require
+   [clojure.test :refer :all]
+   [ledgerx-clj.core :as core]
+   [gniazdo.core :as ws]))
 
 (def last-request (atom {}))
 
@@ -30,28 +30,28 @@
    :on-close on-close
    :on-error on-error})
 
-(defn core-fixture 
+(defn core-fixture
   [test-function]
   (with-redefs [clj-http.client/request mock-request
-                coinbase-pro-clj.utilities/get-timestamp (constantly 1530305893)
+                ledgerx-clj.utilities/get-timestamp (constantly 1530305893)
                 gniazdo.core/send-msg mock-send-msg
                 gniazdo.core/close mock-close
                 gniazdo.core/connect mock-connect]
     (test-function)))
-    
+
 (use-fixtures :each core-fixture)
 
 (def test-client {:url "https://example.com"
                   :key "testkey"
                   :secret "testsecret"
                   :passphrase "testpassphrase"})
-  
+
 ;; ## Public endpoint tests
 
 (deftest get-time-test
   (is (= 1 (core/get-time test-client)))
-  (is (= @last-request {:method "GET", :url "https://example.com/time", :accept :json, :as :json}))) 
-      
+  (is (= @last-request {:method "GET", :url "https://example.com/time", :accept :json, :as :json})))
+
 (deftest get-products-test
   (is (= 1 (core/get-products test-client)))
   (is (= @last-request {:method "GET", :url "https://example.com/products", :accept :json, :as :json})))
@@ -59,16 +59,16 @@
 (deftest get-order-book-test
   (testing "without level argument"
     (is (= 1 (core/get-order-book test-client "ETH-USD")))
-    (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/book?level=1", :accept :json, :as :json})))    
+    (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/book?level=1", :accept :json, :as :json})))
   (testing "with level argument"
     (is (= 1 (core/get-order-book test-client "ETH-USD" 2)))
     (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/book?level=2", :accept :json, :as :json}))))
-            
+
 (deftest get-ticker-test
   (testing "without paging options"
     (is (= 1 (core/get-ticker test-client "ETH-USD")))
     (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/ticker", :accept :json, :as :json})))
-           
+
   (testing "with paging options"
     (is (= 1 (core/get-ticker test-client "ETH-USD" {:before 3 :after 1 :limit 3})))
     (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/ticker?before=3&after=1&limit=3", :accept :json, :as :json}))))
@@ -80,7 +80,7 @@
   (testing "with paging options"
     (is (= 1 (core/get-trades test-client "ETH-USD" {:before 3 :after 1 :limit 3})))
     (is (= @last-request {:method "GET", :url "https://example.com/products/ETH-USD/trades?before=3&after=1&limit=3", :accept :json, :as :json}))))
-      
+
 (deftest get-historic-rates-test
   (testing "without options"
     (is (= 1 (core/get-historic-rates test-client "ETH-USD")))
@@ -193,9 +193,9 @@
                                                          :currency "BTC"
                                                          :crypto_address "123"})))
   (is (= @last-request {:method "POST", :url "https://example.com/withdrawals/crypto", :accept :json, :as :json, :body "{\"amount\":100,\"currency\":\"BTC\",\"crypto_address\":\"123\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "L+IPN58ZRMOSNOUH33LBwXlZw9xxu5mixrqVUPkhwcE=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
-                                                     
+
 (deftest generate-report-test
-  (is (= 1 (core/generate-report test-client {:type "fills" 
+  (is (= 1 (core/generate-report test-client {:type "fills"
                                               :product_id "BTC-USD"
                                               :start_date "2018-1-1"})))
   (is (= @last-request {:method "POST", :url "https://example.com/reports", :accept :json, :as :json, :body "{\"type\":\"fills\",\"product_id\":\"BTC-USD\",\"start_date\":\"2018-1-1\"}", :content-type :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "Sxmef57/sVxBoo8yR7WrIcwTpm3kpZ7ZzPqclaDEOeY=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
@@ -208,9 +208,8 @@
   (is (= 1 (core/get-trailing-volume test-client)))
   (is (= @last-request {:method "GET", :url "https://example.com/users/self/trailing-volume", :accept :json, :as :json, :headers {"CB-ACCESS-KEY" "testkey", "CB-ACCESS-SIGN" "1kHkV6sb0z8F7mHScmpei/Q5KQB4BsOkYBg4tK06E0E=", "CB-ACCESS-TIMESTAMP" 1530305893, "CB-ACCESS-PASSPHRASE" "testpassphrase"}})))
 
-
 ;; ## Websocket tests
-                                                                                                  
+
 (deftest subscribe-test
   (testing "without channels"
     (is (= {:connection 1, :message "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"heartbeat\"],\"key\":\"key\",\"passphrase\":\"passphrase\",\"timestamp\":1530305893,\"signature\":\"Z2s3dTmRzmLKtPilRP5H8vuxFYiLe6mN6kVgk+85c+c=\"}"}

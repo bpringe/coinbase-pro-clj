@@ -1,14 +1,14 @@
-(ns coinbase-pro-clj.authentication
+(ns ledgerx-clj.authentication
   (:require
-    [coinbase-pro-clj.utilities :refer :all]
-    [clojure.data.codec.base64 :as b64]
-    [pandect.algo.sha256 :refer :all]))
+   [ledgerx-clj.utilities :refer :all]
+   [clojure.data.codec.base64 :as b64]
+   [pandect.algo.sha256 :refer :all]))
 
 (defn- create-prehash-string
   [timestamp request]
-  (str timestamp (clojure.string/upper-case (:method request)) 
-    (parse-request-path (:url request)) (:body request)))
-                    
+  (str timestamp (clojure.string/upper-case (:method request))
+       (parse-request-path (:url request)) (:body request)))
+
 (defn- create-http-signature
   [secret timestamp request]
   (let [secret-decoded (b64/decode (.getBytes secret))
@@ -27,7 +27,7 @@
         b64/encode
         String.)))
 
-(defn sign-request 
+(defn sign-request
   [client request]
   (let [timestamp (get-timestamp)]
     (update-in request [:headers] merge {"CB-ACCESS-KEY" (:key client)

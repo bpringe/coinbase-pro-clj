@@ -1,7 +1,7 @@
-(ns coinbase-pro-clj.utilities
+(ns ledgerx-clj.utilities
   (:require
-    [clojure.data.json :as json]
-    [ring.util.codec :refer [form-encode]]))
+   [clojure.data.json :as json]
+   [ring.util.codec :refer [form-encode]]))
 
 (defn edn->json
   [edn-content]
@@ -53,8 +53,8 @@
   [query-params request]
   (if (empty? query-params)
     request
-    (update-in request [:url] 
-      #(str % 
-        (if (clojure.string/includes? % "?") "&" "?") 
-        (form-encode query-params)))))
+    (update-in request [:url]
+               #(str %
+                     (if (clojure.string/includes? % "?") "&" "?")
+                     (form-encode query-params)))))
 
